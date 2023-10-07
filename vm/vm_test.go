@@ -96,9 +96,9 @@ func TestGlobalLetStatements(t *testing.T) {
 
 func TestStringExpressions(t *testing.T) {
 	tests := []vmTestCase{
-		{`"chimp"`, "chimp"},
+		{`"monkey"`, "monkey"},
 		{`"mon" + "key"`, "monkey"},
-		{`"mon" + "key" + "banana"`, "chimpbanana"},
+		{`"mon" + "key" + "banana"`, "monkeybanana"},
 	}
 
 	runVmTests(t, tests)
