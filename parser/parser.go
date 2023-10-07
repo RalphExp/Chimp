@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"fmt"
 	"chimp/ast"
 	"chimp/lexer"
 	"chimp/token"
+	"fmt"
 	"strconv"
 )
 
@@ -21,16 +21,16 @@ const (
 )
 
 var precedences = map[token.TokenType]int{
-	token.EQ:       EQUALS,
-	token.NOT_EQ:   EQUALS,
-	token.LT:       LESSGREATER,
-	token.GT:       LESSGREATER,
-	token.PLUS:     SUM,
-	token.MINUS:    SUM,
-	token.SLASH:    PRODUCT,
-	token.ASTERISK: PRODUCT,
-	token.LPAREN:   CALL,
-	token.LBRACKET: INDEX,
+	token.EQ:       EQUALS,      // == 2
+	token.NOT_EQ:   EQUALS,      // != 2
+	token.LT:       LESSGREATER, // <  3
+	token.GT:       LESSGREATER, // >  3
+	token.PLUS:     SUM,         // +  4
+	token.MINUS:    SUM,         // -  4
+	token.SLASH:    PRODUCT,     // /  5
+	token.ASTERISK: PRODUCT,     // *  5
+	token.LPAREN:   CALL,        // () 7
+	token.LBRACKET: INDEX,       // [] 8
 }
 
 type (

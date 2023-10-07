@@ -2,13 +2,13 @@ package repl
 
 import (
 	"bufio"
-	"fmt"
-	"io"
 	"chimp/compiler"
 	"chimp/lexer"
 	"chimp/object"
 	"chimp/parser"
 	"chimp/vm"
+	"fmt"
+	"io"
 )
 
 const PROMPT = ">> "
@@ -24,6 +24,8 @@ func Start(in io.Reader, out io.Writer) {
 		symbolTable.DefineBuiltin(i, v.Name)
 	}
 
+	fmt.Fprintf(out, MONKEY_FACE)
+
 	for {
 		fmt.Fprintf(out, PROMPT)
 		scanned := scanner.Scan()
@@ -36,6 +38,11 @@ func Start(in io.Reader, out io.Writer) {
 		p := parser.New(l)
 
 		program := p.ParseProgram()
+
+		if len(program.Statements) == 0 {
+			continue
+		}
+
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			continue
@@ -78,7 +85,7 @@ const MONKEY_FACE = `            __,__
 `
 
 func printParserErrors(out io.Writer, errors []string) {
-	io.WriteString(out, MONKEY_FACE)
+	// io.WriteString(out, MONKEY_FACE)
 	io.WriteString(out, "Woops! We ran into some chimp business here!\n")
 	io.WriteString(out, " parser errors:\n")
 	for _, msg := range errors {
