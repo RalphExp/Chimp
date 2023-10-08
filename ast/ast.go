@@ -124,32 +124,6 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
-// While Statement
-type WhileStatement struct {
-	Token      token.Token // the while token
-	Statements []Statement
-}
-
-func (ws *WhileStatement) statementNode()       {}
-func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
-func (ws *WhileStatement) String() string {
-	var out bytes.Buffer
-
-	for _, s := range ws.Statements {
-		out.WriteString(s.String())
-	}
-
-	return out.String()
-}
-
-type BreakStatement struct {
-	Token token.Token // the break token
-}
-
-func (br *BreakStatement) statementNode()       {}
-func (br *BreakStatement) TokenLiteral() string { return br.Token.Literal }
-func (br *BreakStatement) String() string       { return br.Token.Literal }
-
 // Expressions
 type Identifier struct {
 	Token token.Token // the token.IDENT token
@@ -218,16 +192,16 @@ func (oe *InfixExpression) String() string {
 	return out.String()
 }
 
-type IfExpression struct {
+type IfStatement struct {
 	Token       token.Token // The 'if' token
 	Condition   Expression
 	Consequence *BlockStatement
 	Alternative *BlockStatement
 }
 
-func (ie *IfExpression) expressionNode()      {}
-func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
-func (ie *IfExpression) String() string {
+func (ie *IfStatement) statementNode()       {}
+func (ie *IfStatement) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IfStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("if")
@@ -242,6 +216,39 @@ func (ie *IfExpression) String() string {
 
 	return out.String()
 }
+
+// While Statement
+type WhileStatement struct {
+	Token     token.Token // the while token
+	Condition Expression
+	Statement Statement
+}
+
+func (ws *WhileStatement) statementNode()       {}
+func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
+func (ws *WhileStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ws.Statement.String())
+
+	return out.String()
+}
+
+type BreakStatement struct {
+	Token token.Token // the break token
+}
+
+func (br *BreakStatement) statementNode()       {}
+func (br *BreakStatement) TokenLiteral() string { return br.Token.Literal }
+func (br *BreakStatement) String() string       { return br.Token.Literal }
+
+type ContinueStatement struct {
+	Token token.Token // the break token
+}
+
+func (ct *ContinueStatement) statementNode()       {}
+func (ct *ContinueStatement) TokenLiteral() string { return ct.Token.Literal }
+func (ct *ContinueStatement) String() string       { return ct.Token.Literal }
 
 type FunctionLiteral struct {
 	Token      token.Token // The 'fn' token

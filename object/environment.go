@@ -11,6 +11,7 @@ func NewEnvironment() *Environment {
 	return &Environment{store: s, outer: nil}
 }
 
+// TODO: add break and continue env
 type Environment struct {
 	store map[string]Object
 	outer *Environment

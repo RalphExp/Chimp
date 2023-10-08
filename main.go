@@ -1,8 +1,9 @@
 package main
 
 import (
+	_ "chimp/repl/compiler"
+	"chimp/repl/interpretor"
 	"fmt"
-	"chimp/repl"
 	"os"
 	"os/user"
 )
@@ -15,5 +16,9 @@ func main() {
 	fmt.Printf("Hello %s! This is the Chimp programming language!\n",
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
-	repl.Start(os.Stdin, os.Stdout)
+
+	// in := strings.NewReader("while (true) {}")
+
+	// compiler.Start(os.Stdin, os.Stdout)
+	interpretor.Start(os.Stdin, os.Stdout)
 }

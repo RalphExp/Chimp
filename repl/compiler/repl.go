@@ -1,4 +1,4 @@
-package repl
+package compiler
 
 import (
 	"bufio"

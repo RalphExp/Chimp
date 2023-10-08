@@ -1,10 +1,10 @@
 package compiler
 
 import (
-	"fmt"
 	"chimp/ast"
 	"chimp/code"
 	"chimp/object"
+	"fmt"
 	"sort"
 )
 
@@ -132,7 +132,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 
-	case *ast.IfExpression:
+	case *ast.IfStatement:
 		err := c.Compile(node.Condition)
 		if err != nil {
 			return err

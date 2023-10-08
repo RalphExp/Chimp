@@ -2,10 +2,10 @@ package object
 
 import (
 	"bytes"
-	"fmt"
-	"hash/fnv"
 	"chimp/ast"
 	"chimp/code"
+	"fmt"
+	"hash/fnv"
 	"strings"
 )
 
@@ -14,24 +14,20 @@ type BuiltinFunction func(args ...Object) Object
 type ObjectType string
 
 const (
-	NULL_OBJ  = "NULL"
-	ERROR_OBJ = "ERROR"
-
-	INTEGER_OBJ = "INTEGER"
-	BOOLEAN_OBJ = "BOOLEAN"
-	STRING_OBJ  = "STRING"
-
-	RETURN_VALUE_OBJ = "RETURN_VALUE"
-
-	FUNCTION_OBJ = "FUNCTION"
-	BUILTIN_OBJ  = "BUILTIN"
-
-	ARRAY_OBJ = "ARRAY"
-	HASH_OBJ  = "HASH"
-
+	NULL_OBJ              = "NULL"
+	BREAK_OBJ             = "BREAK"
+	CONTINUE_OBJ          = "CONTINUE"
+	ERROR_OBJ             = "ERROR"
+	INTEGER_OBJ           = "INTEGER"
+	BOOLEAN_OBJ           = "BOOLEAN"
+	STRING_OBJ            = "STRING"
+	RETURN_VALUE_OBJ      = "RETURN_VALUE"
+	FUNCTION_OBJ          = "FUNCTION"
+	BUILTIN_OBJ           = "BUILTIN"
+	ARRAY_OBJ             = "ARRAY"
+	HASH_OBJ              = "HASH"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION_OBJ"
-
-	CLOSURE_OBJ = "CLOSURE"
+	CLOSURE_OBJ           = "CLOSURE"
 )
 
 type HashKey struct {
@@ -80,6 +76,16 @@ type Null struct{}
 
 func (n *Null) Type() ObjectType { return NULL_OBJ }
 func (n *Null) Inspect() string  { return "null" }
+
+type Break struct{}
+
+func (b *Break) Type() ObjectType { return BREAK_OBJ }
+func (b *Break) Inspect() string  { return "break" }
+
+type Continue struct{}
+
+func (c *Continue) Type() ObjectType { return CONTINUE_OBJ }
+func (c *Continue) Inspect() string  { return "continue" }
 
 type ReturnValue struct {
 	Value Object

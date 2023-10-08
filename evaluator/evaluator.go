@@ -1,9 +1,9 @@
 package evaluator
 
 import (
-	"fmt"
 	"chimp/ast"
 	"chimp/object"
+	"fmt"
 )
 
 var (
@@ -18,6 +18,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	// Statements
 	case *ast.Program:
 		return evalProgram(node, env)
+
+	case *ast.BreakStatement:
+		return evalBreak(env)
+
+	case *ast.ContinueStatement:
+		return evalContinue(env)
 
 	case *ast.BlockStatement:
 		return evalBlockStatement(node, env)
@@ -69,8 +75,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 		return evalInfixExpression(node.Operator, left, right)
 
-	case *ast.IfExpression:
-		return evalIfExpression(node, env)
+	case *ast.IfStatement:
+		return evalIfStatement(node, env)
+
+	case *ast.WhileStatement:
+		return evalWhileStatement(node, env)
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -136,6 +145,14 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	return result
 }
 
+func evalBreak(env *object.Environment) object.Object {
+	return nil
+}
+
+func evalContinue(env *object.Environment) object.Object {
+	return nil
+}
+
 func evalBlockStatement(
 	block *ast.BlockStatement,
 	env *object.Environment,
@@ -150,9 +167,12 @@ func evalBlockStatement(
 			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
 				return result
 			}
+
+			if rt == object.BOOLEAN_OBJ || rt == object.CONTINUE_OBJ {
+				return result
+			}
 		}
 	}
-
 	return result
 }
 
@@ -262,22 +282,51 @@ func evalStringInfixExpression(
 	return &object.String{Value: leftVal + rightVal}
 }
 
-func evalIfExpression(
-	ie *ast.IfExpression,
+func evalIfStatement(
+	ifs *ast.IfStatement,
 	env *object.Environment,
 ) object.Object {
-	condition := Eval(ie.Condition, env)
+	condition := Eval(ifs.Condition, env)
 	if isError(condition) {
 		return condition
 	}
 
 	if isTruthy(condition) {
-		return Eval(ie.Consequence, env)
-	} else if ie.Alternative != nil {
-		return Eval(ie.Alternative, env)
+		return Eval(ifs.Consequence, env)
+	} else if ifs.Alternative != nil {
+		return Eval(ifs.Alternative, env)
 	} else {
 		return NULL
 	}
+}
+
+func evalWhileStatement(
+	ws *ast.WhileStatement,
+	env *object.Environment,
+) object.Object {
+	for {
+		// fmt.Printf("eval while: checking condition\n")
+		condition := Eval(ws.Condition, env)
+		// fmt.Printf("cond: %v\n", condition)
+		if isError(condition) {
+			return condition
+		}
+		if isTruthy(condition) {
+			obj := Eval(ws.Statement, env)
+			if obj == nil {
+				// do nothing
+			} else if obj.Type() == object.BREAK_OBJ {
+				// TODO: check break environment
+				break
+			} else if obj.Type() == object.CONTINUE_OBJ {
+				// TODO: check continue environment
+				continue
+			}
+		} else {
+			break
+		}
+	}
+	return NULL
 }
 
 func evalIdentifier(
