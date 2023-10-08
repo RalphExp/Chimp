@@ -76,10 +76,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalInfixExpression(node.Operator, left, right)
 
 	case *ast.IfStatement:
-		return evalIfStatement(node, env)
+		evalIfStatement(node, env)
+		return nil
 
 	case *ast.WhileStatement:
-		return evalWhileStatement(node, env)
+		evalWhileStatement(node, env)
+		return nil
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -150,7 +152,8 @@ func evalBreak(env *object.Environment) object.Object {
 		return &object.Error{Message: "no break context found"}
 	}
 
-	return &object.Break{}
+	env.SetState(object.BreakState)
+	return nil
 }
 
 func evalContinue(env *object.Environment) object.Object {
@@ -158,7 +161,8 @@ func evalContinue(env *object.Environment) object.Object {
 		return &object.Error{Message: "no continue context found"}
 	}
 
-	return &object.Continue{}
+	env.SetState(object.ContinueState)
+	return nil
 }
 
 func evalBlockStatement(
@@ -176,8 +180,11 @@ func evalBlockStatement(
 				return result
 			}
 
-			if rt == object.BOOLEAN_OBJ || rt == object.CONTINUE_OBJ {
-				return result
+			// state is set in the break/continue statement
+			if rt == object.BREAK_OBJ {
+				return nil
+			} else if rt == object.CONTINUE_OBJ {
+				return nil
 			}
 		}
 	}
@@ -325,23 +332,22 @@ func evalWhileStatement(
 			if isError(obj) {
 				return NULL
 			}
-			if obj != nil {
-				if obj.Type() == object.BREAK_OBJ {
-					break
-				} else if obj.Type() == object.CONTINUE_OBJ {
-					continue
-				}
+			if env.HasState(object.BreakState) {
+				break
+			} else if env.HasState(object.ContinueState) {
+				continue
 			}
+
 		} else {
 			break
 		}
 	}
 
 	defer func() {
+		env.ClearState(object.BreakState | object.ContinueState)
 		env.PopBreakContext()
 		env.PopContinueContext()
 	}()
-
 	return NULL
 }
 
