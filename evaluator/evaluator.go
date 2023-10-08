@@ -369,6 +369,15 @@ func isTruthy(obj object.Object) bool {
 	case FALSE:
 		return false
 	default:
+		switch obj.Type() {
+		case object.INTEGER_OBJ:
+			i := obj.(*object.Integer).Value
+			return i != 0
+
+		case object.STRING_OBJ:
+			i := len(obj.(*object.String).Value)
+			return i > 0
+		}
 		return true
 	}
 }

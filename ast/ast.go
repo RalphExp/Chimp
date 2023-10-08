@@ -195,8 +195,8 @@ func (oe *InfixExpression) String() string {
 type IfStatement struct {
 	Token       token.Token // The 'if' token
 	Condition   Expression
-	Consequence *BlockStatement
-	Alternative *BlockStatement
+	Consequence Statement
+	Alternative Statement
 }
 
 func (ie *IfStatement) statementNode()       {}

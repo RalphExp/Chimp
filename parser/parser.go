@@ -375,22 +375,25 @@ func (p *Parser) parseIfStatment() ast.Statement {
 		return nil
 	}
 
-	if !p.expectPeek(token.LBRACE) {
-		return nil
+	if p.peekToken.Type == token.LBRACE {
+		p.nextToken()
+		statement.Consequence = p.parseBlockStatement()
+	} else {
+		p.nextToken()
+		statement.Consequence = p.parseStatement()
 	}
-
-	statement.Consequence = p.parseBlockStatement()
 
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
 
-		if !p.expectPeek(token.LBRACE) {
-			return nil
+		if p.peekToken.Type == token.LBRACE {
+			p.nextToken()
+			statement.Alternative = p.parseBlockStatement()
+		} else {
+			p.nextToken()
+			statement.Alternative = p.parseStatement()
 		}
-
-		statement.Alternative = p.parseBlockStatement()
 	}
-
 	return statement
 }
 
