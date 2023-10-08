@@ -147,6 +147,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseLetStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.WHILE:
+		return p.parseWhileStatement()
+	case token.BREAK:
+		return p.parseBreakStatment()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -204,6 +208,14 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseWhileStatement() *ast.WhileStatement {
+	return nil
+}
+
+func (p *Parser) parseBreakStatment() *ast.BreakStatement {
+	return nil
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
@@ -362,6 +374,8 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	lit := &ast.FunctionLiteral{Token: p.curToken}
+
+	// TODO: add function name
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil

@@ -4,15 +4,22 @@ import "chimp/token"
 
 type Lexer struct {
 	input        string
-	position     int  // current position in input (points to current char)
-	readPosition int  // current reading position in input (after current char)
-	ch           byte // current char under examination
+	position     int    // current position in input (points to current char)
+	readPosition int    // current reading position in input (after current char)
+	ch           byte   // current char under examination
+	file         string // current file name or (stdin) if not read from file
+	line         int    // line number
+	column       int    // column number
 }
 
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
 	return l
+}
+
+func NewFile(input string) *Lexer {
+	return nil
 }
 
 func (l *Lexer) NextToken() token.Token {

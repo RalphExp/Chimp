@@ -2,8 +2,8 @@ package ast
 
 import (
 	"bytes"
-	"fmt"
 	"chimp/token"
+	"fmt"
 	"strings"
 )
 
@@ -123,6 +123,32 @@ func (bs *BlockStatement) String() string {
 
 	return out.String()
 }
+
+// While Statement
+type WhileStatement struct {
+	Token      token.Token // the while token
+	Statements []Statement
+}
+
+func (ws *WhileStatement) statementNode()       {}
+func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
+func (ws *WhileStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range ws.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
+type BreakStatement struct {
+	Token token.Token // the break token
+}
+
+func (br *BreakStatement) statementNode()       {}
+func (br *BreakStatement) TokenLiteral() string { return br.Token.Literal }
+func (br *BreakStatement) String() string       { return br.Token.Literal }
 
 // Expressions
 type Identifier struct {
