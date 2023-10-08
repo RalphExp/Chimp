@@ -17,7 +17,7 @@ func main() {
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
 
-	// in := strings.NewReader("while (true) {}")
+	// in := strings.NewReader("while (true) 1")
 
 	// compiler.Start(os.Stdin, os.Stdout)
 	interpretor.Start(os.Stdin, os.Stdout)

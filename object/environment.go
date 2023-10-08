@@ -13,8 +13,34 @@ func NewEnvironment() *Environment {
 
 // TODO: add break and continue env
 type Environment struct {
-	store map[string]Object
-	outer *Environment
+	store      map[string]Object
+	outer      *Environment
+	brkContext int // break context
+	cntContext int // continue context
+}
+
+func (e *Environment) PushBreakContext() {
+	e.brkContext++
+}
+
+func (e *Environment) PushContinueContext() {
+	e.cntContext++
+}
+
+func (e *Environment) PopBreakContext() {
+	e.brkContext--
+}
+
+func (e *Environment) PopContinueContext() {
+	e.cntContext--
+}
+
+func (e *Environment) HasBreakContext() bool {
+	return e.brkContext > 0
+}
+
+func (e *Environment) HasContinueContext() bool {
+	return e.cntContext > 0
 }
 
 func (e *Environment) Get(name string) (Object, bool) {

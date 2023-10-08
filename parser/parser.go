@@ -352,10 +352,10 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 	}
 
 	if p.peekToken.Type == token.LBRACE {
-		fmt.Printf("parse block\n")
 		p.nextToken()
 		statement.Statement = p.parseBlockStatement()
 	} else {
+		p.nextToken()
 		statement.Statement = p.parseStatement()
 	}
 	return statement

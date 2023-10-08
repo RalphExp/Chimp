@@ -146,11 +146,19 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 }
 
 func evalBreak(env *object.Environment) object.Object {
-	return nil
+	if !env.HasBreakContext() {
+		return &object.Error{Message: "no break context found"}
+	}
+
+	return &object.Break{}
 }
 
 func evalContinue(env *object.Environment) object.Object {
-	return nil
+	if !env.HasContinueContext() {
+		return &object.Error{Message: "no continue context found"}
+	}
+
+	return &object.Continue{}
 }
 
 func evalBlockStatement(
@@ -304,28 +312,36 @@ func evalWhileStatement(
 	ws *ast.WhileStatement,
 	env *object.Environment,
 ) object.Object {
+	env.PushBreakContext()
+	env.PushContinueContext()
+
 	for {
-		// fmt.Printf("eval while: checking condition\n")
 		condition := Eval(ws.Condition, env)
-		// fmt.Printf("cond: %v\n", condition)
 		if isError(condition) {
 			return condition
 		}
 		if isTruthy(condition) {
 			obj := Eval(ws.Statement, env)
-			if obj == nil {
-				// do nothing
-			} else if obj.Type() == object.BREAK_OBJ {
-				// TODO: check break environment
-				break
-			} else if obj.Type() == object.CONTINUE_OBJ {
-				// TODO: check continue environment
-				continue
+			if isError(obj) {
+				return NULL
+			}
+			if obj != nil {
+				if obj.Type() == object.BREAK_OBJ {
+					break
+				} else if obj.Type() == object.CONTINUE_OBJ {
+					continue
+				}
 			}
 		} else {
 			break
 		}
 	}
+
+	defer func() {
+		env.PopBreakContext()
+		env.PopContinueContext()
+	}()
+
 	return NULL
 }
 
