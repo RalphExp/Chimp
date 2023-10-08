@@ -77,11 +77,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.IfStatement:
 		evalIfStatement(node, env)
-		return nil
+		return NULL
 
 	case *ast.WhileStatement:
 		evalWhileStatement(node, env)
-		return nil
+		return NULL
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -127,7 +127,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	}
 
-	return nil
+	return NULL
 }
 
 func evalProgram(program *ast.Program, env *object.Environment) object.Object {
@@ -174,17 +174,15 @@ func evalBlockStatement(
 	for _, statement := range block.Statements {
 		result = Eval(statement, env)
 
+		// state is set in the break/continue statement
+		if env.HasState(object.BreakState | object.ContinueState) {
+			return nil
+		}
+
 		if result != nil {
 			rt := result.Type()
 			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
 				return result
-			}
-
-			// state is set in the break/continue statement
-			if rt == object.BREAK_OBJ {
-				return nil
-			} else if rt == object.CONTINUE_OBJ {
-				return nil
 			}
 		}
 	}
@@ -307,16 +305,14 @@ func evalIfStatement(
 	}
 
 	if isTruthy(condition) {
-		return Eval(ifs.Consequence, env)
+		Eval(ifs.Consequence, env)
 	} else if ifs.Alternative != nil {
-		return Eval(ifs.Alternative, env)
-	} else {
-		return NULL
+		Eval(ifs.Alternative, env)
 	}
+	return NULL
 }
 
-func evalWhileStatement(
-	ws *ast.WhileStatement,
+func evalWhileStatement(ws *ast.WhileStatement,
 	env *object.Environment,
 ) object.Object {
 	env.PushBreakContext()
@@ -337,7 +333,6 @@ func evalWhileStatement(
 			} else if env.HasState(object.ContinueState) {
 				continue
 			}
-
 		} else {
 			break
 		}
@@ -382,6 +377,10 @@ func isTruthy(obj object.Object) bool {
 
 		case object.STRING_OBJ:
 			i := len(obj.(*object.String).Value)
+			return i > 0
+
+		case object.ARRAY_OBJ:
+			i := len(obj.(*object.Array).Elements)
 			return i > 0
 		}
 		return true
