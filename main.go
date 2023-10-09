@@ -17,8 +17,24 @@ func main() {
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
 
-	// in := strings.NewReader("while (true) 1")
+	// in := strings.NewReader(`
+	//     let fibonacci = func(x) {
+	// 		if (x == 0) {
+	// 		  return 0
+	// 		} else {
+	// 		  if (x == 1) {
+	// 			return 1;
+	// 		  } else {
+	// 			return fibonacci(x - 1) + fibonacci(x - 2);
+	// 		  }
+	// 		}
+	// 	};
+	// 	puts(fibonacci)
+	// 	puts("may")
+	// 	puts(fibonacci(0))
+	// `)
 
+	// let fib = func(x){if(x==0){return 0}else{if(x==1){return 1;}else{return fib(x-1) + fib(x-2);}}};
 	// compiler.Start(os.Stdin, os.Stdout)
 	interpretor.Start(os.Stdin, os.Stdout)
 }

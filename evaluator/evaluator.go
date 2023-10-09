@@ -76,12 +76,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalInfixExpression(node.Operator, left, right)
 
 	case *ast.IfStatement:
-		evalIfStatement(node, env)
-		return NULL
+		return evalIfStatement(node, env)
 
 	case *ast.WhileStatement:
-		evalWhileStatement(node, env)
-		return NULL
+		return evalWhileStatement(node, env)
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -305,9 +303,9 @@ func evalIfStatement(
 	}
 
 	if isTruthy(condition) {
-		Eval(ifs.Consequence, env)
+		return Eval(ifs.Consequence, env)
 	} else if ifs.Alternative != nil {
-		Eval(ifs.Alternative, env)
+		return Eval(ifs.Alternative, env)
 	}
 	return NULL
 }
@@ -332,6 +330,8 @@ func evalWhileStatement(ws *ast.WhileStatement,
 				break
 			} else if env.HasState(object.ContinueState) {
 				continue
+			} else if obj.Type() == object.RETURN_VALUE_OBJ {
+				return obj
 			}
 		} else {
 			break
