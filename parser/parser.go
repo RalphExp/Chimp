@@ -159,6 +159,9 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBreakStatement()
 	case token.CONTINUE:
 		return p.parseContinueStatement()
+	case token.SEMICOLON:
+		// nil statement
+		return nil
 	default:
 		return p.parseExpressionStatement()
 	}
