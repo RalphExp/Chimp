@@ -125,6 +125,11 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	p.errors = append(p.errors, msg)
 }
 
+func (p *Parser) notMatchError(t token.TokenType) {
+	msg := fmt.Sprintf("token not match, expect '%s', but got %s", t, p.curToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
@@ -411,6 +416,9 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		p.nextToken()
 	}
 
+	if p.curToken.Type != token.RBRACE {
+		p.notMatchError(token.RBRACE)
+	}
 	return block
 }
 
