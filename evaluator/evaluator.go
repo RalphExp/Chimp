@@ -228,16 +228,11 @@ func evalInfixExpression(
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
-	switch right {
-	case TRUE:
-		return FALSE
-	case FALSE:
-		return TRUE
-	case NULL:
-		return TRUE
-	default:
+	var b bool = isTruthy(right)
+	if b {
 		return FALSE
 	}
+	return TRUE
 }
 
 func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
@@ -377,10 +372,6 @@ func isTruthy(obj object.Object) bool {
 
 		case object.STRING_OBJ:
 			i := len(obj.(*object.String).Value)
-			return i > 0
-
-		case object.ARRAY_OBJ:
-			i := len(obj.(*object.Array).Elements)
 			return i > 0
 		}
 		return true
