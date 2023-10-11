@@ -1,56 +1,51 @@
 package token
 
-type TokenType string
+type TokenType int
 
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
-
+	NIL = iota
+	ILLEGAL
+	EOF
 	// Identifiers + literals
-	IDENT  = "IDENT"  // add, foobar, x, y, ...
-	INT    = "INT"    // 1343456
-	STRING = "STRING" // "foobar"
-
+	IDENT
+	INT
+	// "foobar"
+	STRING
 	// Operators
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-
-	LT = "<"
-	GT = ">"
-
-	EQ     = "=="
-	NOT_EQ = "!="
-
+	ASSIGN
+	PLUS
+	MINUS
+	BANG     // !
+	ASTERISK // "*"
+	SLASH    // "/"
+	LT       // "<"
+	GT       // ">"
+	EQ       // "=="
+	NOT_EQ   // "!="
 	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-	COLON     = ":"
-
-	LPAREN   = "("
-	RPAREN   = ")"
-	LBRACE   = "{"
-	RBRACE   = "}"
-	LBRACKET = "["
-	RBRACKET = "]"
-
+	COMMA     // ","
+	SEMICOLON // ";"
+	COLON     // ":"
+	LPAREN    // "("
+	RPAREN    // ")"
+	LBRACE    // "{"
+	RBRACE    // "}"
+	LBRACKET  // "["
+	RBRACKET  // "]"
 	// Keywords
-	FUNCTION = "FUNCTION"
-	LET      = "LET"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
+	FUNCTION
+	LET
+	TRUE
+	FALSE
+	IF
+	ELSE
+	RETURN
 	// Added in Chimp Parser
-	DO       = "DO"
-	FOR      = "FOR"
-	WHILE    = "WHILE"
-	BREAK    = "BREAK"
-	CONTINUE = "CONTINUE"
+	DO
+	FOR
+	WHILE
+	BREAK
+	CONTINUE
 )
 
 type Token struct {

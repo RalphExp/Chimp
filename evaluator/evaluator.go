@@ -174,7 +174,7 @@ func evalBlockStatement(
 
 		// state is set in the break/continue statement
 		if env.HasState(object.BreakState | object.ContinueState) {
-			return nil
+			return NULL
 		}
 
 		if result != nil {
