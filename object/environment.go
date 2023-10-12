@@ -54,11 +54,23 @@ func (e *Environment) PopContinueContext() {
 }
 
 func (e *Environment) HasBreakContext() bool {
-	return e.brkContext > 0
+	for e != nil {
+		if e.brkContext > 0 {
+			return true
+		}
+		e = e.outer
+	}
+	return false
 }
 
 func (e *Environment) HasContinueContext() bool {
-	return e.cntContext > 0
+	for e != nil {
+		if e.cntContext > 0 {
+			return true
+		}
+		e = e.outer
+	}
+	return false
 }
 
 func (e *Environment) Get(name string) (Object, bool) {

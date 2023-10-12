@@ -5,6 +5,7 @@ import (
 	"chimp/token"
 	"io"
 	"strconv"
+	"strings"
 )
 
 type Lexer struct {
@@ -22,6 +23,16 @@ type Lexer struct {
  * since we have to implement a better REPL, we should let the lexer read
  * as less as possible for further parsing by the parser. */
 func New(reader io.Reader) *Lexer {
+	l := &Lexer{
+		scanner:  bufio.NewScanner(reader),
+		position: 0,
+		repl:     true,
+	}
+	return l
+}
+
+func NewString(input string) *Lexer {
+	reader := strings.NewReader(input)
 	l := &Lexer{
 		scanner:  bufio.NewScanner(reader),
 		position: 0,
