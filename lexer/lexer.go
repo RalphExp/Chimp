@@ -143,7 +143,7 @@ func (l *Lexer) readNext(inc bool) {
 	if l.position >= len(l.input) {
 		for l.scanner.Scan() {
 			if len(l.scanner.Text()) > 0 {
-				l.input += l.scanner.Text() + ";"
+				l.input += l.scanner.Text()
 				break
 			}
 		}
@@ -163,7 +163,7 @@ func (l *Lexer) peekChar() byte {
 	if l.position+1 >= len(l.input) {
 		for l.scanner.Scan() {
 			if len(l.scanner.Text()) > 0 {
-				l.input += l.scanner.Text() + ";"
+				l.input += l.scanner.Text()
 				break
 			}
 		}
