@@ -212,8 +212,14 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
+	// if fl, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+	// 	fl.Name = stmt.Name.Value
+	// }
+
 	if fl, ok := stmt.Value.(*ast.FunctionLiteral); ok {
-		fl.Name = stmt.Name.Value
+		if fl.Name == "" {
+			fl.Name = stmt.Name.Value
+		}
 	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
@@ -392,6 +398,9 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		p.nextToken()
 		statement.Statement = p.parseStatement()
 	}
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
 	return statement
 }
 
@@ -428,6 +437,10 @@ func (p *Parser) parseIfStatment() ast.Statement {
 			statement.Alternative = p.parseStatement()
 		}
 	}
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
 	return statement
 }
 
@@ -454,7 +467,10 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	lit := &ast.FunctionLiteral{Token: p.GetToken()}
 
-	// TODO: add function name
+	if p.peekTokenIs(token.IDENT) {
+		lit.Name = p.PeekToken().Literal
+		p.nextToken()
+	}
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil
