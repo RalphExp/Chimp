@@ -169,8 +169,10 @@ func evalBlockStatement(
 ) object.Object {
 	var result object.Object
 
+	extendedEnv := object.NewEnclosedEnvironment(env)
+
 	for _, statement := range block.Statements {
-		result = Eval(statement, env)
+		result = Eval(statement, extendedEnv)
 
 		// state is set in the break/continue statement
 		if env.HasState(object.BreakState | object.ContinueState) {
