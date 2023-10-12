@@ -1,11 +1,11 @@
 package interpretor
 
 import (
-	"bufio"
 	"chimp/evaluator"
 	"chimp/lexer"
 	"chimp/object"
 	"chimp/parser"
+	"chimp/token"
 	"fmt"
 	"io"
 )
@@ -13,33 +13,32 @@ import (
 const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
 
 	fmt.Printf(MONKEY_FACE)
+	fmt.Fprintf(out, PROMPT)
+
+	l := lexer.New(in)
+	p := parser.New(l)
 
 	for {
-		fmt.Fprintf(out, PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
-		}
-
-		line := scanner.Text()
-		l := lexer.New(line)
-		p := parser.New(l)
-
-		program := p.ParseProgram()
+		statement := p.ParseStatement()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
-			continue
+			break
 		}
 
-		evaluated := evaluator.Eval(program, env)
+		if statement == nil && p.GetToken().Type == token.EOF {
+			fmt.Printf("Bye!!\n")
+			break
+		}
+
+		evaluated := evaluator.Eval(statement, env)
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
 		}
+		p.NextToken()
 	}
 }
 
