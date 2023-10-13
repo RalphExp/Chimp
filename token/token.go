@@ -13,11 +13,19 @@ const (
 	STRING
 	// Operators
 	ASSIGN
+	ADD_ASSIGN
+	SUB_ASSIGN
+	MUL_ASSIGN
+	DIV_ASSIGN
+	MOD_ASSIGN
+	INC
+	DEC
 	PLUS
 	MINUS
 	BANG     // !
 	ASTERISK // "*"
 	SLASH    // "/"
+	MOD      // "%"
 	LT       // "<"
 	GT       // ">"
 	EQ       // "=="
