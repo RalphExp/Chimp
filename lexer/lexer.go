@@ -3,8 +3,8 @@ package lexer
 import (
 	"bufio"
 	"chimp/token"
+	"fmt"
 	"io"
-	"strconv"
 	"strings"
 )
 
@@ -128,7 +128,7 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 func (l *Lexer) GetInput() string {
-	return l.input + "," + strconv.Itoa(l.position)
+	return fmt.Sprintf("input: %s, pos: %d\n", l.input, l.position)
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -151,7 +151,8 @@ func (l *Lexer) readNext(inc bool) {
 	if l.position >= len(l.input) {
 		for l.scanner.Scan() {
 			if len(l.scanner.Text()) > 0 {
-				l.input += l.scanner.Text()
+				l.input = l.scanner.Text()
+				l.position = 0
 				break
 			}
 		}
@@ -165,24 +166,6 @@ func (l *Lexer) readNext(inc bool) {
 	if inc {
 		l.position++
 	}
-}
-
-func (l *Lexer) peekChar() byte {
-	if l.position+1 >= len(l.input) {
-		for l.scanner.Scan() {
-			if len(l.scanner.Text()) > 0 {
-				l.input += l.scanner.Text()
-				break
-			}
-		}
-	}
-
-	if l.position+1 >= len(l.input) {
-		return 0
-	} else {
-		return l.input[l.position+1]
-	}
-	// don't advance position
 }
 
 func (l *Lexer) readIdentifier() string {
