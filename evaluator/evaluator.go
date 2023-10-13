@@ -154,17 +154,14 @@ func evalBreak(env *object.Environment) object.Object {
 		return &object.Error{Message: "no break context found"}
 	}
 
-	env.SetState(object.BreakState)
-	return nil
+	return &object.Break{}
 }
 
 func evalContinue(env *object.Environment) object.Object {
 	if !env.HasContinueContext() {
 		return &object.Error{Message: "no continue context found"}
 	}
-
-	env.SetState(object.ContinueState)
-	return nil
+	return &object.Continue{}
 }
 
 func evalBlockStatement(
@@ -179,13 +176,12 @@ func evalBlockStatement(
 		result = Eval(statement, extendedEnv)
 
 		// state is set in the break/continue statement
-		if env.HasState(object.BreakState | object.ContinueState) {
-			return NULL
-		}
-
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
+			if rt == object.RETURN_VALUE_OBJ ||
+				rt == object.ERROR_OBJ ||
+				rt == object.BREAK_OBJ ||
+				rt == object.CONTINUE_OBJ {
 				return result
 			}
 		}
@@ -327,9 +323,12 @@ func evalWhileStatement(ws *ast.WhileStatement,
 			if isError(obj) {
 				return NULL
 			}
-			if env.HasState(object.BreakState) {
+
+			if obj == nil {
+				continue
+			} else if obj.Type() == object.BREAK_OBJ {
 				break
-			} else if env.HasState(object.ContinueState) {
+			} else if obj.Type() == object.CONTINUE_OBJ {
 				continue
 			} else if obj.Type() == object.RETURN_VALUE_OBJ {
 				return obj
@@ -340,7 +339,6 @@ func evalWhileStatement(ws *ast.WhileStatement,
 	}
 
 	defer func() {
-		env.ClearState(object.BreakState | object.ContinueState)
 		env.PopBreakContext()
 		env.PopContinueContext()
 	}()
