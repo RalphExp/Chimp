@@ -15,8 +15,8 @@ const PROMPT = ">> "
 func Start(in io.Reader, out io.Writer) {
 	env := object.NewEnvironment()
 
-	fmt.Printf(MONKEY_FACE)
-	fmt.Fprintf(out, PROMPT)
+	fmt.Fprintf(out, "%s", MONKEY_FACE)
+	fmt.Fprintf(out, "%s", PROMPT)
 
 	l := lexer.New(in)
 	p := parser.New(l)
@@ -34,10 +34,11 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		evaluated := evaluator.Eval(statement, env)
-		if evaluated != nil {
+		if evaluated != nil && evaluated != evaluator.NULL {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
 		}
+		fmt.Fprintf(out, "%s", PROMPT)
 		p.NextToken()
 	}
 }
