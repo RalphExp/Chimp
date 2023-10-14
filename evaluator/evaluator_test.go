@@ -135,7 +135,7 @@ if (10 > 1) {
 		},
 		{
 			`
-let f = fn(x) {
+let f = func(x) {
   return x;
   x + 10;
 };
@@ -144,7 +144,7 @@ f(10);`,
 		},
 		{
 			`
-let f = fn(x) {
+let f = func(x) {
    let result = x + 10;
    return result;
    return 10;
@@ -214,7 +214,7 @@ if (10 > 1) {
 			"identifier not found: foobar",
 		},
 		{
-			`{"name": "Monkey"}[fn(x) { x }];`,
+			`{"name": "Monkey"}[func(x) { x }];`,
 			"unusable as hash key: FUNCTION",
 		},
 		{
@@ -257,7 +257,7 @@ func TestLetStatements(t *testing.T) {
 }
 
 func TestFunctionObject(t *testing.T) {
-	input := "fn(x) { x + 2; };"
+	input := "func(x) { x + 2; };"
 
 	evaluated := testEval(input)
 	fn, ok := evaluated.(*object.Function)
@@ -286,12 +286,12 @@ func TestFunctionApplication(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{"let identity = fn(x) { x; }; identity(5);", 5},
-		{"let identity = fn(x) { return x; }; identity(5);", 5},
-		{"let double = fn(x) { x * 2; }; double(5);", 10},
-		{"let add = fn(x, y) { x + y; }; add(5, 5);", 10},
-		{"let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
-		{"fn(x) { x; }(5)", 5},
+		{"let identity = func(x) { x; }; identity(5);", 5},
+		{"let identity = func(x) { return x; }; identity(5);", 5},
+		{"let double = func(x) { x * 2; }; double(5);", 10},
+		{"let add = func(x, y) { x + y; }; add(5, 5);", 10},
+		{"let add = func(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+		{"func(x) { x; }(5)", 5},
 	}
 
 	for _, tt := range tests {
@@ -305,7 +305,7 @@ let first = 10;
 let second = 10;
 let third = 10;
 
-let ourFunction = fn(first) {
+let ourFunction = func(first) {
   let second = 20;
 
   first + second + third;
@@ -318,8 +318,8 @@ ourFunction(20) + first + second;`
 
 func TestClosures(t *testing.T) {
 	input := `
-let newAdder = fn(x) {
-  fn(y) { x + y };
+let newAdder = func(x) {
+	func(y) { x + y };
 };
 
 let addTwo = newAdder(2);
@@ -583,7 +583,7 @@ func TestHashIndexExpressions(t *testing.T) {
 	}
 }
 func testEval(input string) object.Object {
-	l := lexer.New(input)
+	l := lexer.NewString(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
