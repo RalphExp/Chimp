@@ -36,7 +36,7 @@ func main() {
 	var duration time.Duration
 	var result object.Object
 
-	l := lexer.New(input)
+	l := lexer.NewString(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 

@@ -153,18 +153,19 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %d, got %d instead",
-		t, p.peekToken_.Type)
+	msg := fmt.Sprintf("expected next token to be '%s', got '%s' instead",
+		t.Name(), p.peekToken_.Type.Name())
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no prefix parse function for %d found", t)
+	msg := fmt.Sprintf("no prefix parse function for '%s' found", t.Name())
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) notMatchError(t token.TokenType) {
-	msg := fmt.Sprintf("token not match, expect '%d', but got %d", t, p.curToken_.Type)
+	msg := fmt.Sprintf("token not match, expect '%s', but got '%s'",
+		t.Name(), p.curToken_.Type.Name())
 	p.errors = append(p.errors, msg)
 }
 

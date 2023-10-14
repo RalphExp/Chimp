@@ -126,6 +126,10 @@ var token2name = map[int]string{
 	CONTINUE: "continue",
 }
 
+func (t TokenType) Name() string {
+	return token2name[int(t)]
+}
+
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok
