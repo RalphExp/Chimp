@@ -250,8 +250,13 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Name = &ast.Identifier{Token: p.GetToken(), Value: p.GetToken().Literal}
 
-	if !p.expectPeek(token.ASSIGN) {
-		return nil
+	if !p.peekTokenIs(token.ASSIGN) {
+		if p.peekTokenIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+		// support let a;
+		// which will create an elemnet in the environment with a NULL value
+		return stmt
 	}
 
 	p.nextToken()
