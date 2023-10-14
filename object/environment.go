@@ -22,6 +22,7 @@ type Environment struct {
 	outer      *Environment
 	brkContext int // break context
 	cntContext int // continue context
+	retContext int // return context
 }
 
 func (e *Environment) PushBreakContext() {

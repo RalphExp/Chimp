@@ -195,6 +195,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseIfStatment()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	// chimp's new feature
 	case token.WHILE:
 		return p.parseWhileStatement()
 	case token.BREAK:
@@ -251,6 +252,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt.Name = &ast.Identifier{Token: p.GetToken(), Value: p.GetToken().Literal}
 
 	if !p.peekTokenIs(token.ASSIGN) {
+
 		if p.peekTokenIs(token.SEMICOLON) {
 			p.nextToken()
 		}
@@ -259,7 +261,8 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return stmt
 	}
 
-	p.nextToken()
+	p.nextToken() // eats IDENT
+	p.nextToken() // eats '='
 
 	stmt.Value = p.parseExpression(LOWEST)
 
