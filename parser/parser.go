@@ -33,6 +33,15 @@ var precedences = map[token.TokenType]int{
 	token.LBRACKET: INDEX,       // [] 8
 }
 
+var assignmentOp = map[token.TokenType]bool{
+	token.ASSIGN:     true,
+	token.ADD_ASSIGN: true,
+	token.SUB_ASSIGN: true,
+	token.MUL_ASSIGN: true,
+	token.DIV_ASSIGN: true,
+	token.MOD_ASSIGN: true,
+}
+
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
@@ -123,6 +132,12 @@ func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	return p.peekToken_.Type == t
 }
 
+func (p *Parser) peekTokenIsAssignment() bool {
+	p.PeekToken()
+	_, ok := assignmentOp[p.PeekToken().Type]
+	return ok
+}
+
 func (p *Parser) expectPeek(t token.TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
@@ -190,9 +205,40 @@ func (p *Parser) parseStatement() ast.Statement {
 		fallthrough
 	case token.EOF:
 		return nil
+	case token.IDENT:
+		if p.peekTokenIsAssignment() {
+			return p.parseAssignmentStatement()
+		}
+		fallthrough
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
+	stmt := &ast.AssignmentStatement{
+		Token: p.GetToken(),
+		Name:  &ast.Identifier{Token: p.GetToken(), Value: p.GetToken().Literal}}
+
+	p.nextToken()
+
+	stmt.Operator = p.GetToken().Literal
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if fl, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		if fl.Name == "" {
+			fl.Name = stmt.Name.Value
+		}
+	}
+
+	for p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {
@@ -222,7 +268,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		}
 	}
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	for p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 

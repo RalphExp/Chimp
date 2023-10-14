@@ -60,12 +60,18 @@ func (e *Environment) HasContinueContext() bool {
 	return false
 }
 
-func (e *Environment) Get(name string) (Object, bool) {
-	obj, ok := e.store[name]
-	if !ok && e.outer != nil {
-		obj, ok = e.outer.Get(name)
+func (e *Environment) Get(name string) (Object, *Environment) {
+	for e != nil {
+		obj, ok := e.store[name]
+		if ok {
+			return obj, e
+		} else if e.outer != nil {
+			e = e.outer
+		} else {
+			break
+		}
 	}
-	return obj, ok
+	return nil, nil
 }
 
 func (e *Environment) Set(name string, val Object) Object {

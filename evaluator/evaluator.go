@@ -44,6 +44,27 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		env.Set(node.Name.Value, val)
+		return NULL
+
+	case *ast.AssignmentStatement:
+		left, e := env.Get(node.Name.Value)
+		if e == nil {
+			return &object.Error{Message: fmt.Sprintf("variable %s not found", node.Name.Value)}
+		}
+
+		right := Eval(node.Value, env)
+		if isError(right) {
+			return right
+		}
+
+		op := node.Operator[0]
+		switch op {
+		case '=':
+			e.Set(node.Name.Value, right)
+		default:
+			e.Set(node.Name.Value, evalInfixExpression(string(op), left, right))
+		}
+		return NULL
 
 	// Expressions
 	case *ast.IntegerLiteral:
@@ -349,7 +370,7 @@ func evalIdentifier(
 	node *ast.Identifier,
 	env *object.Environment,
 ) object.Object {
-	if val, ok := env.Get(node.Value); ok {
+	if val, e := env.Get(node.Value); e != nil {
 		return val
 	}
 

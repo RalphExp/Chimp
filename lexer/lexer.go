@@ -36,7 +36,7 @@ func NewString(input string) *Lexer {
 	l := &Lexer{
 		scanner:  bufio.NewScanner(reader),
 		position: 0,
-		repl:     true,
+		repl:     false,
 	}
 	return l
 }
@@ -61,9 +61,21 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.ASSIGN, '=')
 		}
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		if l.getChar() == '=' {
+			l.readChar()
+			literal := "+="
+			tok = token.Token{Type: token.ADD_ASSIGN, Literal: literal}
+		} else {
+			tok = newToken(token.PLUS, '+')
+		}
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		if l.getChar() == '=' {
+			l.readChar()
+			literal := "-="
+			tok = token.Token{Type: token.SUB_ASSIGN, Literal: literal}
+		} else {
+			tok = newToken(token.MINUS, '-')
+		}
 	case '!':
 		if l.getChar() == '=' {
 			l.readChar()
@@ -114,16 +126,19 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
+			// fmt.Printf("token: %s\n", tok.Literal)
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Type = token.INT
 			tok.Literal = l.readNumber()
+			// fmt.Printf("token: %s\n", tok.Literal)
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
 
+	// fmt.Printf("token: %s\n", tok.Literal)
 	return tok
 }
 
