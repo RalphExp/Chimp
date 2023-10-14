@@ -10,7 +10,7 @@ func TestNextToken(t *testing.T) {
 	input := `let five = 5;
 let ten = 10;
 
-let add = fn(x, y) {
+let add = func(x, y) {
   x + y;
 };
 
@@ -49,7 +49,7 @@ if (5 < 10) {
 		{token.LET, "let"},
 		{token.IDENT, "add"},
 		{token.ASSIGN, "="},
-		{token.FUNCTION, "fn"},
+		{token.FUNCTION, "func"},
 		{token.LPAREN, "("},
 		{token.IDENT, "x"},
 		{token.COMMA, ","},
@@ -125,14 +125,14 @@ if (5 < 10) {
 		{token.EOF, ""},
 	}
 
-	l := New(input)
+	l := NewString(input)
 
 	for i, tt := range tests {
 		tok := l.NextToken()
 
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
+				i, tt.expectedLiteral, tok.Literal)
 		}
 
 		if tok.Literal != tt.expectedLiteral {
