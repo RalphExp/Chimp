@@ -234,7 +234,7 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 		}
 	}
 
-	for p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -268,7 +268,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		}
 	}
 
-	for p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -444,6 +444,7 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		p.nextToken()
 		statement.Statement = p.parseStatement()
 	}
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}

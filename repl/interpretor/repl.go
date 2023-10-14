@@ -22,19 +22,25 @@ func Start(in io.Reader, out io.Writer) {
 	p := parser.New(l)
 
 	for {
+		if p.GetToken().Type == token.EOF {
+			fmt.Printf("Bye!!\n")
+			break
+		}
+
 		statement := p.ParseStatement()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			break
 		}
 
-		if statement == nil && p.GetToken().Type == token.EOF {
-			fmt.Printf("Bye!!\n")
-			break
+		if statement == nil {
+			fmt.Fprintf(out, "%s", PROMPT)
+			p.NextToken()
+			continue
 		}
 
 		evaluated := evaluator.Eval(statement, env)
-		if evaluated != nil && evaluated != evaluator.NULL {
+		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out, "\n")
 		}
