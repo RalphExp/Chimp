@@ -341,7 +341,7 @@ func evalWhileStatement(ws *ast.WhileStatement,
 		if isTruthy(condition) {
 			obj := Eval(ws.Statement, env)
 			if isError(obj) {
-				return NULL
+				return obj
 			}
 
 			if obj == nil {
