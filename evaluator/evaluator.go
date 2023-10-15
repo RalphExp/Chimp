@@ -196,7 +196,6 @@ func evalBlockStatement(
 	for _, statement := range block.Statements {
 		result = Eval(statement, extendedEnv)
 
-		// state is set in the break/continue statement
 		if result != nil {
 			rt := result.Type()
 			if rt == object.RETURN_VALUE_OBJ ||
