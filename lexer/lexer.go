@@ -85,9 +85,29 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.BANG, '!')
 		}
 	case '/':
-		tok = newToken(token.SLASH, l.ch)
+		if l.getChar() == '=' {
+			l.readChar()
+			literal := "/="
+			tok = token.Token{Type: token.DIV_ASSIGN, Literal: literal}
+		} else {
+			tok = newToken(token.SLASH, '/')
+		}
 	case '*':
-		tok = newToken(token.ASTERISK, l.ch)
+		if l.getChar() == '=' {
+			l.readChar()
+			literal := "*="
+			tok = token.Token{Type: token.MUL_ASSIGN, Literal: literal}
+		} else {
+			tok = newToken(token.ASTERISK, '*')
+		}
+	case '%':
+		if l.getChar() == '=' {
+			l.readChar()
+			literal := "%="
+			tok = token.Token{Type: token.MOD_ASSIGN, Literal: literal}
+		} else {
+			tok = newToken(token.MOD, '%')
+		}
 	case '<':
 		tok = newToken(token.LT, l.ch)
 	case '>':
