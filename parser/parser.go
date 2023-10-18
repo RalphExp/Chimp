@@ -201,6 +201,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	// chimp's new feature
 	case token.WHILE:
 		return p.parseWhileStatement()
+	case token.DO:
+		return p.parseDoWhileStatement()
 	case token.BREAK:
 		return p.parseBreakStatement()
 	case token.CONTINUE:
@@ -462,6 +464,10 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		p.nextToken()
 	}
 	return statement
+}
+
+func (p *Parser) parseDoWhileStatement() ast.Statement {
+	return nil
 }
 
 func (p *Parser) parseIfStatment() ast.Statement {
