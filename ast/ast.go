@@ -253,8 +253,33 @@ func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
 func (ws *WhileStatement) String() string {
 	var out bytes.Buffer
 
+	out.WriteString("while")
+	out.WriteString(ws.Condition.String())
+	out.WriteString("{")
 	out.WriteString(ws.Statement.String())
+	out.WriteString("}")
 
+	return out.String()
+}
+
+// While Statement
+type DoWhileStatement struct {
+	Token     token.Token // the while token
+	Condition Expression
+	Statement Statement
+}
+
+func (dw *DoWhileStatement) statementNode()       {}
+func (dw *DoWhileStatement) TokenLiteral() string { return dw.Token.Literal }
+func (dw *DoWhileStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("do")
+	out.WriteString("{")
+	out.WriteString(dw.Statement.String())
+	out.WriteString("}")
+	out.WriteString("while")
+	out.WriteString(dw.Condition.String())
 	return out.String()
 }
 
