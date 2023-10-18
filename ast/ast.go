@@ -85,7 +85,7 @@ func (as *AssignmentStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString(as.Name.String())
-	out.WriteString(as.TokenLiteral())
+	out.WriteString(as.Operator)
 
 	if as.Value != nil {
 		out.WriteString(as.Value.String())
@@ -141,9 +141,11 @@ func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
 
+	out.WriteString("{")
 	for _, s := range bs.Statements {
 		out.WriteString(s.String())
 	}
+	out.WriteString("}")
 
 	return out.String()
 }
@@ -255,10 +257,7 @@ func (ws *WhileStatement) String() string {
 
 	out.WriteString("while")
 	out.WriteString(ws.Condition.String())
-	out.WriteString("{")
 	out.WriteString(ws.Statement.String())
-	out.WriteString("}")
-
 	return out.String()
 }
 
@@ -275,9 +274,7 @@ func (dw *DoWhileStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("do")
-	out.WriteString("{")
 	out.WriteString(dw.Statement.String())
-	out.WriteString("}")
 	out.WriteString("while")
 	out.WriteString(dw.Condition.String())
 	return out.String()
