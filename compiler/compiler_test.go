@@ -339,7 +339,7 @@ func TestGlobalLetStatements(t *testing.T) {
 func TestFunctions(t *testing.T) {
 	tests := []compilerTestCase{
 		{
-			input: `fn() { return 5 + 10 }`,
+			input: `func() { return 5 + 10 }`,
 			expectedConstants: []interface{}{
 				5,
 				10,
@@ -356,7 +356,7 @@ func TestFunctions(t *testing.T) {
 			},
 		},
 		{
-			input: `fn() { 5 + 10 }`,
+			input: `func() { 5 + 10 }`,
 			expectedConstants: []interface{}{
 				5,
 				10,
@@ -373,7 +373,7 @@ func TestFunctions(t *testing.T) {
 			},
 		},
 		{
-			input: `fn() { 1; 2 }`,
+			input: `func() { 1; 2 }`,
 			expectedConstants: []interface{}{
 				1,
 				2,
@@ -578,7 +578,7 @@ func TestIndexExpressions(t *testing.T) {
 func TestFunctionsWithoutReturnValue(t *testing.T) {
 	tests := []compilerTestCase{
 		{
-			input: `fn() { }`,
+			input: `func() { }`,
 			expectedConstants: []interface{}{
 				[]code.Instructions{
 					code.Make(code.OpReturn),
@@ -597,7 +597,7 @@ func TestFunctionsWithoutReturnValue(t *testing.T) {
 func TestFunctionCalls(t *testing.T) {
 	tests := []compilerTestCase{
 		{
-			input: `fn() { 24 }();`,
+			input: `func() { 24 }();`,
 			expectedConstants: []interface{}{
 				24,
 				[]code.Instructions{
@@ -613,7 +613,7 @@ func TestFunctionCalls(t *testing.T) {
 		},
 		{
 			input: `
-			let noArg = fn() { 24 };
+			let noArg = func() { 24 };
 			noArg();
 			`,
 			expectedConstants: []interface{}{
@@ -633,7 +633,7 @@ func TestFunctionCalls(t *testing.T) {
 		},
 		{
 			input: `
-			let oneArg = fn(a) { a };
+			let oneArg = func(a) { a };
 			oneArg(24);
 			`,
 			expectedConstants: []interface{}{
@@ -654,7 +654,7 @@ func TestFunctionCalls(t *testing.T) {
 		},
 		{
 			input: `
-			let manyArg = fn(a, b, c) { a; b; c };
+			let manyArg = func(a, b, c) { a; b; c };
 			manyArg(24, 25, 26);
 			`,
 			expectedConstants: []interface{}{
@@ -691,7 +691,7 @@ func TestLetStatementScopes(t *testing.T) {
 		{
 			input: `
 			let num = 55;
-			fn() { num }
+			func() { num }
 			`,
 			expectedConstants: []interface{}{
 				55,
@@ -709,7 +709,7 @@ func TestLetStatementScopes(t *testing.T) {
 		},
 		{
 			input: `
-			fn() {
+			func() {
 				let num = 55;
 				num
 			}
@@ -730,7 +730,7 @@ func TestLetStatementScopes(t *testing.T) {
 		},
 		{
 			input: `
-			fn() {
+			func() {
 				let a = 55;
 				let b = 77;
 				a + b
@@ -781,7 +781,7 @@ func TestBuiltins(t *testing.T) {
 			},
 		},
 		{
-			input: `fn() { len([]) }`,
+			input: `func() { len([]) }`,
 			expectedConstants: []interface{}{
 				[]code.Instructions{
 					code.Make(code.OpGetBuiltin, 0),
@@ -804,8 +804,8 @@ func TestClosures(t *testing.T) {
 	tests := []compilerTestCase{
 		{
 			input: `
-			fn(a) {
-				fn(b) {
+			func(a) {
+				func(b) {
 					a + b
 				}
 			}
@@ -830,9 +830,9 @@ func TestClosures(t *testing.T) {
 		},
 		{
 			input: `
-			fn(a) {
-				fn(b) {
-					fn(c) {
+			func(a) {
+				func(b) {
+					func(c) {
 						a + b + c
 					}
 				}
@@ -868,13 +868,13 @@ func TestClosures(t *testing.T) {
 			input: `
 			let global = 55;
 
-			fn() {
+			func() {
 				let a = 66;
 
-				fn() {
+				func() {
 					let b = 77;
 
-					fn() {
+					func() {
 						let c = 88;
 
 						global + a + b + c;
@@ -931,7 +931,7 @@ func TestRecursiveFunctions(t *testing.T) {
 	tests := []compilerTestCase{
 		{
 			input: `
-			let countDown = fn(x) { countDown(x - 1); };
+			let countDown = func(x) { countDown(x - 1); };
 			countDown(1);
 			`,
 			expectedConstants: []interface{}{
@@ -957,8 +957,8 @@ func TestRecursiveFunctions(t *testing.T) {
 		},
 		{
 			input: `
-			let wrapper = fn() {
-				let countDown = fn(x) { countDown(x - 1); };
+			let wrapper = func() {
+				let countDown = func(x) { countDown(x - 1); };
 				countDown(1);
 			};
 			wrapper();
@@ -997,7 +997,7 @@ func TestRecursiveFunctions(t *testing.T) {
 }
 
 func parse(input string) *ast.Program {
-	l := lexer.New(input)
+	l := lexer.NewString(input)
 	p := parser.New(l)
 	return p.ParseProgram()
 }
