@@ -52,8 +52,8 @@ type Parser struct {
 	l      *lexer.Lexer
 	errors []string
 
-	curToken_  token.Token
-	peekToken_ token.Token
+	curToken  token.Token
+	peekToken token.Token
 
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
@@ -100,39 +100,39 @@ func (p *Parser) NextToken() {
 }
 
 func (p *Parser) GetToken() token.Token {
-	if p.curToken_.Type == token.NIL {
-		p.curToken_ = p.l.NextToken()
-		p.peekToken_.Type = token.NIL
+	if p.curToken.Type == token.NIL {
+		p.curToken = p.l.NextToken()
+		p.peekToken.Type = token.NIL
 	}
-	return p.curToken_
+	return p.curToken
 }
 
 func (p *Parser) PeekToken() token.Token {
 	p.GetToken()
-	if p.peekToken_.Type == token.NIL {
-		p.peekToken_ = p.l.NextToken()
+	if p.peekToken.Type == token.NIL {
+		p.peekToken = p.l.NextToken()
 	}
-	return p.peekToken_
+	return p.peekToken
 }
 
 func (p *Parser) nextToken() {
-	if p.peekToken_.Type != token.NIL {
-		p.curToken_ = p.peekToken_
+	if p.peekToken.Type != token.NIL {
+		p.curToken = p.peekToken
 	} else {
-		p.curToken_ = p.l.NextToken()
+		p.curToken = p.l.NextToken()
 	}
-	p.peekToken_.Type = token.NIL
-	p.peekToken_.Literal = ""
+	p.peekToken.Type = token.NIL
+	p.peekToken.Literal = ""
 }
 
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	p.GetToken()
-	return p.curToken_.Type == t
+	return p.curToken.Type == t
 }
 
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	p.PeekToken()
-	return p.peekToken_.Type == t
+	return p.peekToken.Type == t
 }
 
 func (p *Parser) peekTokenIsAssignment() bool {
@@ -157,7 +157,7 @@ func (p *Parser) Errors() []string {
 
 func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("expected next token to be '%s', got '%s' instead",
-		t.Name(), p.peekToken_.Type.Name())
+		t.Name(), p.peekToken.Type.Name())
 	p.errors = append(p.errors, msg)
 }
 
@@ -168,7 +168,7 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 
 func (p *Parser) notMatchError(t token.TokenType) {
 	msg := fmt.Sprintf("token not match, expect '%s', but got '%s'",
-		t.Name(), p.curToken_.Type.Name())
+		t.Name(), p.curToken.Type.Name())
 	p.errors = append(p.errors, msg)
 }
 
