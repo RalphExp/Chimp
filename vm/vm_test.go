@@ -1,12 +1,12 @@
 package vm
 
 import (
-	"fmt"
 	"chimp/ast"
 	"chimp/compiler"
 	"chimp/lexer"
 	"chimp/object"
 	"chimp/parser"
+	"fmt"
 	"testing"
 )
 
@@ -645,7 +645,7 @@ func runVmTests(t *testing.T, tests []vmTestCase) {
 }
 
 func parse(input string) *ast.Program {
-	l := lexer.New(input)
+	l := lexer.NewString(input)
 	p := parser.New(l)
 	return p.ParseProgram()
 }

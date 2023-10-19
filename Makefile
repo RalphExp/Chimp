@@ -19,6 +19,7 @@ test:
 	@echo testing object ... && (cd object && go test *);
 	@echo testing interpreter ... && (cd evaluator && go test *);
 	@echo testing code ... && (cd code && go test *);
+	@echo testing vm ... && (cd vm && go test *);
 	@echo testing compiler ... && (cd compiler && go test *);
 
 benchmark:
