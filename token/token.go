@@ -54,6 +54,7 @@ const (
 	WHILE
 	BREAK
 	CONTINUE
+	NULL
 )
 
 type Token struct {
@@ -65,7 +66,7 @@ var keywords = map[string]TokenType{
 	"func":     FUNCTION,
 	"let":      LET,
 	"true":     TRUE,
-	"null":     NIL,
+	"null":     NULL,
 	"false":    FALSE,
 	"if":       IF,
 	"else":     ELSE,
@@ -78,7 +79,7 @@ var keywords = map[string]TokenType{
 }
 
 var token2name = map[int]string{
-	NIL:        "nil",
+	NULL:       "null",
 	ILLEGAL:    "illegal",
 	EOF:        "eof",
 	IDENT:      "id",

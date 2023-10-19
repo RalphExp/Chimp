@@ -160,6 +160,14 @@ func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string       { return i.Value }
 
+type Null struct {
+	Token token.Token
+}
+
+func (n *Null) expressionNode()      {}
+func (n *Null) TokenLiteral() string { return n.Token.Literal }
+func (n *Null) String() string       { return n.Token.Literal }
+
 type Boolean struct {
 	Token token.Token
 	Value bool
