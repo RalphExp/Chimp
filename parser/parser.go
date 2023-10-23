@@ -465,9 +465,6 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		statement.Statement = p.parseStatement()
 	}
 
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
 	return statement
 }
 
@@ -509,9 +506,6 @@ func (p *Parser) parseIfStatment() ast.Statement {
 		}
 	}
 
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
 	return statement
 }
 
