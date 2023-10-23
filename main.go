@@ -19,10 +19,12 @@ func main() {
 
 	if len(os.Args) >= 2 {
 		if os.Args[1] == "-vm" {
+			fmt.Printf("engine [vm]\n")
 			compiler.Start(os.Stdin, os.Stdout)
-		} else if os.Args[1] == "-eval" {
-			interpretor.Start(os.Stdin, os.Stdout)
+			return
 		}
 	}
+
+	fmt.Printf("engine [interpreter]\n")
 	interpretor.Start(os.Stdin, os.Stdout)
 }

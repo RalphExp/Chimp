@@ -22,6 +22,9 @@ func Start(in io.Reader, out io.Writer) {
 		symbolTable.DefineBuiltin(i, v.Name)
 	}
 
+	fmt.Fprintf(out, "%s", MONKEY_FACE)
+	fmt.Fprintf(out, "%s", PROMPT)
+
 	l := lexer.New(in)
 	p := parser.New(l)
 
@@ -63,6 +66,9 @@ func Start(in io.Reader, out io.Writer) {
 		lastPopped := machine.LastPoppedStackElem()
 		io.WriteString(out, lastPopped.Inspect())
 		io.WriteString(out, "\n")
+
+		fmt.Fprintf(out, "%s", PROMPT)
+		p.NextToken()
 	}
 }
 
