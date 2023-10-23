@@ -1,12 +1,12 @@
 package compiler
 
 import (
-	"fmt"
 	"chimp/ast"
 	"chimp/code"
 	"chimp/lexer"
 	"chimp/object"
 	"chimp/parser"
+	"fmt"
 	"testing"
 )
 

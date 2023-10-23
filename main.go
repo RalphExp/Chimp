@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "chimp/repl/compiler"
+	"chimp/repl/compiler"
 	"chimp/repl/interpretor"
 	"fmt"
 	"os"
@@ -17,11 +17,12 @@ func main() {
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
 
-	// s := `let m = 1;`
-	// in := strings.NewReader(s)
-	// _ = in
-
-	// compiler.Start(os.Stdin, os.Stdout)
-	// interpretor.Start(in, os.Stdout)
+	if len(os.Args) >= 2 {
+		if os.Args[1] == "-vm" {
+			compiler.Start(os.Stdin, os.Stdout)
+		} else if os.Args[1] == "-eval" {
+			interpretor.Start(os.Stdin, os.Stdout)
+		}
+	}
 	interpretor.Start(os.Stdin, os.Stdout)
 }

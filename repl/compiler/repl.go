@@ -1,11 +1,11 @@
 package compiler
 
 import (
-	"bufio"
 	"chimp/compiler"
 	"chimp/lexer"
 	"chimp/object"
 	"chimp/parser"
+	"chimp/token"
 	"chimp/vm"
 	"fmt"
 	"io"
@@ -14,8 +14,6 @@ import (
 const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
-
 	constants := []object.Object{}
 	globals := make([]object.Object, vm.GlobalsSize)
 
@@ -24,33 +22,29 @@ func Start(in io.Reader, out io.Writer) {
 		symbolTable.DefineBuiltin(i, v.Name)
 	}
 
-	fmt.Fprintf(out, MONKEY_FACE)
+	l := lexer.New(in)
+	p := parser.New(l)
 
 	for {
-		fmt.Fprintf(out, PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+		if p.GetToken().Type == token.EOF {
+			fmt.Printf("Bye!!\n")
+			break
 		}
 
-		line := scanner.Text()
-		_ = line
-		l := lexer.New(nil)
-		p := parser.New(l)
-
-		program := p.ParseProgram()
-
-		if len(program.Statements) == 0 {
-			continue
-		}
-
+		statement := p.ParseStatement()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
+			break
+		}
+
+		if statement == nil {
+			fmt.Fprintf(out, "%s", PROMPT)
+			p.NextToken()
 			continue
 		}
 
 		comp := compiler.NewWithState(symbolTable, constants)
-		err := comp.Compile(program)
+		err := comp.Compile(statement)
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
 			continue
