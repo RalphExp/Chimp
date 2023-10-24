@@ -12,8 +12,8 @@ type Compiler struct {
 	constants       []object.Object
 	symbolTable     *SymbolTable
 	scopes          []CompilationScope
-	breakContext    []int
-	continueContext []int
+	breakContext    [][]int
+	continueContext [][]int
 	scopeIndex      int
 }
 
@@ -35,9 +35,27 @@ func New() *Compiler {
 		symbolTable:     symbolTable,
 		scopes:          []CompilationScope{mainScope},
 		scopeIndex:      0,
-		breakContext:    make([]int, 0),
-		continueContext: make([]int, 0),
+		breakContext:    make([][]int, 0),
+		continueContext: make([][]int, 0),
 	}
+}
+
+func (c *Compiler) pushBreakContext() {
+	c.breakContext = append(c.breakContext, []int{})
+}
+
+func (c *Compiler) popBreakContext() {
+	l := len(c.breakContext)
+	c.breakContext = c.breakContext[0 : l-1]
+}
+
+func (c *Compiler) pushContinueContext() {
+	c.continueContext = append(c.continueContext, []int{})
+}
+
+func (c *Compiler) popContinueContext() {
+	l := len(c.continueContext)
+	c.continueContext = c.continueContext[0 : l-1]
 }
 
 func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
@@ -134,6 +152,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
 
+	case *ast.BreakStatement:
+		if len(c.breakContext) == 0 {
+			return fmt.Errorf("no break context found")
+		}
+		pos := c.emit(code.OpJump, -1)
+		l := len(c.breakContext) - 1
+		c.breakContext[l] = append(c.breakContext[l], pos)
+
+	case *ast.ContinueStatement:
+		if len(c.continueContext) == 0 {
+			return fmt.Errorf("no continue context found")
+		}
+		pos := c.emit(code.OpJump, -1)
+		l := len(c.continueContext) - 1
+		c.continueContext[l] = append(c.continueContext[l], pos)
+
 	case *ast.IfStatement:
 		err := c.Compile(node.Condition)
 		if err != nil {
@@ -148,9 +182,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		if c.lastInstructionIs(code.OpPop) {
-			c.removeLastPop()
-		}
+		// don't need this since if is statement
+		// if c.lastInstructionIs(code.OpPop) {
+		// 	c.removeLastPop()
+		// }
 
 		// Emit an `OpJump` with a bogus value
 		jumpPos := c.emit(code.OpJump, -1)
@@ -159,26 +194,47 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
 
 		if node.Alternative == nil {
-			c.emit(code.OpNull)
+			// don't need this
+			// c.emit(code.OpNull)
 		} else {
 			err := c.Compile(node.Alternative)
 			if err != nil {
 				return err
 			}
 
-			if c.lastInstructionIs(code.OpPop) {
-				c.removeLastPop()
-			}
+			// don't need this
+			// if c.lastInstructionIs(code.OpPop) {
+			// 	c.removeLastPop()
+			// }
 		}
 
 		afterAlternativePos := len(c.currentInstructions())
 		c.changeOperand(jumpPos, afterAlternativePos)
 		// since if is a statment now, VM should pop the TOS
-		c.emit(code.OpPop)
+
+		// don't need this
+		// c.emit(code.OpPop)
 
 	case *ast.WhileStatement:
-		// TODO: break and continue
-		restart := len(c.currentInstructions())
+		var restart int
+		var end int
+
+		c.pushBreakContext()
+		c.pushContinueContext()
+		defer func() {
+			// backfill
+			l := len(c.breakContext)
+			for _, pos := range c.breakContext[l-1] {
+				c.changeOperand(pos, end)
+			}
+			for _, pos := range c.continueContext[l-1] {
+				c.changeOperand(pos, restart)
+			}
+			c.popBreakContext()
+			c.popContinueContext()
+		}()
+
+		restart = len(c.currentInstructions())
 		err := c.Compile(node.Condition)
 		if err != nil {
 			return err
@@ -192,16 +248,30 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpJump, restart)
-		endPos := len(c.currentInstructions())
-		c.changeOperand(jmpToEnd, endPos)
+		end = len(c.currentInstructions())
+		c.changeOperand(jmpToEnd, end)
 
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
 
 	case *ast.DoWhileStatement:
-		// TODO: break and continue
+		var restart int
+		var end int
+		defer func() {
+			// backfill
+			l := len(c.breakContext)
+			for _, pos := range c.breakContext[l-1] {
+				c.changeOperand(pos, end)
+			}
+			for _, pos := range c.continueContext[l-1] {
+				c.changeOperand(pos, restart)
+			}
+			c.popBreakContext()
+			c.popContinueContext()
+		}()
 
-		restart := len(c.currentInstructions())
+		restart = len(c.currentInstructions())
+
 		err := c.Compile(node.Statement)
 		if err != nil {
 			return err
@@ -215,8 +285,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		jmpToEnd := c.emit(code.OpJumpNotTruthy, -1)
 		c.emit(code.OpJump, restart)
 
-		endPos := len(c.currentInstructions())
-		c.changeOperand(jmpToEnd, endPos)
+		end = len(c.currentInstructions())
+		c.changeOperand(jmpToEnd, end)
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
 
