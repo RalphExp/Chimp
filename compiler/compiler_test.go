@@ -243,16 +243,14 @@ func TestConditionals(t *testing.T) {
 				// 0000
 				code.Make(code.OpTrue),
 				// 0001
-				code.Make(code.OpJumpNotTruthy, 10),
+				code.Make(code.OpJumpNotTruthy, 11),
 				// 0004
 				code.Make(code.OpConstant, 0),
 				// 0007
-				code.Make(code.OpJump, 11),
-				// 0010
-				code.Make(code.OpNull),
-				// 0011
 				code.Make(code.OpPop),
-				// 0012
+				// 0008
+				code.Make(code.OpJump, 11),
+				// 0011
 				code.Make(code.OpConstant, 1),
 				// 0015
 				code.Make(code.OpPop),
@@ -267,18 +265,20 @@ func TestConditionals(t *testing.T) {
 				// 0000
 				code.Make(code.OpTrue),
 				// 0001
-				code.Make(code.OpJumpNotTruthy, 10),
+				code.Make(code.OpJumpNotTruthy, 11),
 				// 0004
 				code.Make(code.OpConstant, 0),
 				// 0007
-				code.Make(code.OpJump, 13),
-				// 0010
-				code.Make(code.OpConstant, 1),
-				// 0013
 				code.Make(code.OpPop),
+				// 0008
+				code.Make(code.OpJump, 15),
+				// 0011
+				code.Make(code.OpConstant, 1),
 				// 0014
+				code.Make(code.OpPop),
+				// 0015
 				code.Make(code.OpConstant, 2),
-				// 0017
+				// 0018
 				code.Make(code.OpPop),
 			},
 		},
