@@ -4,11 +4,11 @@ A toy language with VM, extending Monkey
 ### New Features
 - a enhanced REPL shell and interpreter
 - change if expression to if statement
-- supports while statement
-- supports do-while statement
-- supports break and continue statements
-- op-assigment
+- support while statement
+- support do-while statement
+- support break and continue statements
+- op-assigment +=, -=, .etc
 
 ### How to run
-> go run main.go
+> go run main.go [-vm|-eval]
 
