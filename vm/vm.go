@@ -16,13 +16,10 @@ var False = &object.Boolean{Value: false}
 var Null = &object.Null{}
 
 type VM struct {
-	constants []object.Object
-
-	stack []object.Object
-	sp    int // Always points to the next value. Top of stack is stack[sp-1]
-
-	globals []object.Object
-
+	constants   []object.Object
+	stack       []object.Object
+	sp          int // Always points to the next value. Top of stack is stack[sp-1]
+	globals     []object.Object
 	frames      []*Frame
 	framesIndex int
 }
@@ -36,13 +33,10 @@ func New(bytecode *compiler.Bytecode) *VM {
 	frames[0] = mainFrame
 
 	return &VM{
-		constants: bytecode.Constants,
-
-		stack: make([]object.Object, StackSize),
-		sp:    0,
-
-		globals: make([]object.Object, GlobalsSize),
-
+		constants:   bytecode.Constants,
+		stack:       make([]object.Object, StackSize),
+		sp:          0,
+		globals:     make([]object.Object, GlobalsSize),
 		frames:      frames,
 		framesIndex: 1,
 	}
