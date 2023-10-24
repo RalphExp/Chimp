@@ -9,12 +9,12 @@ import (
 )
 
 type Compiler struct {
-	constants []object.Object
-
-	symbolTable *SymbolTable
-
-	scopes     []CompilationScope
-	scopeIndex int
+	constants       []object.Object
+	symbolTable     *SymbolTable
+	scopes          []CompilationScope
+	breakContext    []int
+	continueContext []int
+	scopeIndex      int
 }
 
 func New() *Compiler {
@@ -31,10 +31,12 @@ func New() *Compiler {
 	}
 
 	return &Compiler{
-		constants:   []object.Object{},
-		symbolTable: symbolTable,
-		scopes:      []CompilationScope{mainScope},
-		scopeIndex:  0,
+		constants:       []object.Object{},
+		symbolTable:     symbolTable,
+		scopes:          []CompilationScope{mainScope},
+		scopeIndex:      0,
+		breakContext:    make([]int, 0),
+		continueContext: make([]int, 0),
 	}
 }
 
@@ -139,7 +141,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		// Emit an `OpJumpNotTruthy` with a bogus value
-		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, -1)
 
 		err = c.Compile(node.Consequence)
 		if err != nil {
@@ -151,7 +153,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		// Emit an `OpJump` with a bogus value
-		jumpPos := c.emit(code.OpJump, 9999)
+		jumpPos := c.emit(code.OpJump, -1)
 
 		afterConsequencePos := len(c.currentInstructions())
 		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
@@ -173,6 +175,50 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.changeOperand(jumpPos, afterAlternativePos)
 		// since if is a statment now, VM should pop the TOS
 		c.emit(code.OpPop)
+
+	case *ast.WhileStatement:
+		// TODO: break and continue
+		restart := len(c.currentInstructions())
+		err := c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		jmpToEnd := c.emit(code.OpJumpNotTruthy, -1)
+
+		err = c.Compile(node.Statement)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.OpJump, restart)
+		endPos := len(c.currentInstructions())
+		c.changeOperand(jmpToEnd, endPos)
+
+		// since while is not a expression, the TOS should be the same
+		// before compiling while statement
+
+	case *ast.DoWhileStatement:
+		// TODO: break and continue
+
+		restart := len(c.currentInstructions())
+		err := c.Compile(node.Statement)
+		if err != nil {
+			return err
+		}
+
+		err = c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		jmpToEnd := c.emit(code.OpJumpNotTruthy, -1)
+		c.emit(code.OpJump, restart)
+
+		endPos := len(c.currentInstructions())
+		c.changeOperand(jmpToEnd, endPos)
+		// since while is not a expression, the TOS should be the same
+		// before compiling while statement
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
