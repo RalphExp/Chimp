@@ -47,6 +47,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return NULL
 
 	case *ast.AssignmentStatement:
+		// FIXME: we need an lValue?
 		left, e := env.Get(node.Name.Value)
 		if e == nil {
 			return &object.Error{Message: fmt.Sprintf("variable %s not found", node.Name.Value)}

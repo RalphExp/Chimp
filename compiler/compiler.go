@@ -311,6 +311,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpSetLocal, symbol.Index)
 		}
 
+	case *ast.AssignmentStatement:
+		// TODO:
+
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
