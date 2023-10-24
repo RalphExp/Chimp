@@ -192,7 +192,7 @@ func evalBlockStatement(
 	block *ast.BlockStatement,
 	env *object.Environment,
 ) object.Object {
-	var result object.Object
+	var result object.Object = NULL
 
 	extendedEnv := object.NewEnclosedEnvironment(env)
 
@@ -389,13 +389,16 @@ func evalDoWhileStatement(
 			return obj
 		}
 
-		if obj.Type() == object.BREAK_OBJ {
-			break
-		} else if obj.Type() == object.CONTINUE_OBJ {
-			continue
-		} else if obj.Type() == object.RETURN_VALUE_OBJ {
-			return obj
+		if obj != nil {
+			if obj.Type() == object.BREAK_OBJ {
+				break
+			} else if obj.Type() == object.CONTINUE_OBJ {
+				continue
+			} else if obj.Type() == object.RETURN_VALUE_OBJ {
+				return obj
+			}
 		}
+
 		condition := Eval(dw.Condition, env)
 		if isError(condition) {
 			return condition
