@@ -344,6 +344,11 @@ func evalWhileStatement(ws *ast.WhileStatement,
 	env.PushBreakContext()
 	env.PushContinueContext()
 
+	defer func() {
+		env.PopBreakContext()
+		env.PopContinueContext()
+	}()
+
 	for {
 		condition := Eval(ws.Condition, env)
 		if isError(condition) {
@@ -368,11 +373,6 @@ func evalWhileStatement(ws *ast.WhileStatement,
 			break
 		}
 	}
-
-	defer func() {
-		env.PopBreakContext()
-		env.PopContinueContext()
-	}()
 	return NULL
 }
 
