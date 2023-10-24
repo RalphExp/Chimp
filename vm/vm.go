@@ -1,10 +1,10 @@
 package vm
 
 import (
-	"fmt"
 	"chimp/code"
 	"chimp/compiler"
 	"chimp/object"
+	"fmt"
 )
 
 const StackSize = 2048
@@ -56,6 +56,10 @@ func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
 
 func (vm *VM) LastPoppedStackElem() object.Object {
 	return vm.stack[vm.sp]
+}
+
+func (vm *VM) GetStackSize() int {
+	return vm.sp
 }
 
 func (vm *VM) Run() error {
@@ -576,6 +580,15 @@ func isTruthy(obj object.Object) bool {
 		return false
 
 	default:
+		switch obj.Type() {
+		case object.INTEGER_OBJ:
+			i := obj.(*object.Integer).Value
+			return i != 0
+
+		case object.STRING_OBJ:
+			i := len(obj.(*object.String).Value)
+			return i > 0
+		}
 		return true
 	}
 }

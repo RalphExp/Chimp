@@ -171,6 +171,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		afterAlternativePos := len(c.currentInstructions())
 		c.changeOperand(jumpPos, afterAlternativePos)
+		// since if is a statment now, VM should pop the TOS
+		c.emit(code.OpPop)
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
