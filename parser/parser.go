@@ -450,7 +450,9 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 		return nil
 	}
 
-	p.nextToken() // eats '('
+	// expectPeek eats 'while' and nextToken eats '('
+	p.nextToken()
+
 	statement.Condition = p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.RPAREN) {
@@ -469,7 +471,34 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 }
 
 func (p *Parser) parseDoWhileStatement() ast.Statement {
-	return nil
+	statement := &ast.DoWhileStatement{Token: p.GetToken()}
+
+	if p.peekTokenIs(token.LBRACE) {
+		p.nextToken()
+		statement.Statement = p.parseBlockStatement()
+	} else {
+		p.nextToken()
+		statement.Statement = p.parseStatement()
+	}
+
+	if !p.expectPeek(token.WHILE) {
+		return nil
+	}
+	// now current token is WHILE
+
+	if !p.expectPeek(token.LPAREN) {
+		// expectPeek eats WHILE
+		return nil
+	}
+
+	// eats '('
+	p.nextToken()
+	statement.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+	return statement
 }
 
 func (p *Parser) parseIfStatment() ast.Statement {

@@ -102,6 +102,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.WhileStatement:
 		return evalWhileStatement(node, env)
 
+	case *ast.DoWhileStatement:
+		return evalDoWhileStatement(node, env)
+
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 
@@ -364,6 +367,43 @@ func evalWhileStatement(ws *ast.WhileStatement,
 		} else {
 			break
 		}
+	}
+
+	defer func() {
+		env.PopBreakContext()
+		env.PopContinueContext()
+	}()
+	return NULL
+}
+
+func evalDoWhileStatement(
+	dw *ast.DoWhileStatement,
+	env *object.Environment,
+) object.Object {
+	env.PushBreakContext()
+	env.PushContinueContext()
+
+	for {
+		obj := Eval(dw.Statement, env)
+		if isError(obj) {
+			return obj
+		}
+
+		if obj.Type() == object.BREAK_OBJ {
+			break
+		} else if obj.Type() == object.CONTINUE_OBJ {
+			continue
+		} else if obj.Type() == object.RETURN_VALUE_OBJ {
+			return obj
+		}
+		condition := Eval(dw.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+		if isTruthy(condition) {
+			continue
+		}
+		break
 	}
 
 	defer func() {

@@ -272,8 +272,8 @@ func (ws *WhileStatement) String() string {
 // While Statement
 type DoWhileStatement struct {
 	Token     token.Token // the while token
-	Condition Expression
 	Statement Statement
+	Condition Expression
 }
 
 func (dw *DoWhileStatement) statementNode()       {}
