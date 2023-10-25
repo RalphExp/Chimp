@@ -54,6 +54,8 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		code := comp.Bytecode()
+		fmt.Fprintf(out, "%s\n", code.Instructions.String())
+
 		constants = code.Constants
 
 		machine := vm.NewWithGlobalsStore(code, globals)
@@ -66,6 +68,8 @@ func Start(in io.Reader, out io.Writer) {
 		lastPopped := machine.LastPoppedStackElem()
 		io.WriteString(out, lastPopped.Inspect())
 		io.WriteString(out, "\n")
+		// io.WriteString(out, fmt.Sprintf("stack size: %d\n", machine.GetStackSize()))
+		// io.WriteString(out, "\n")
 
 		fmt.Fprintf(out, "%s", PROMPT)
 		p.NextToken()
