@@ -257,34 +257,40 @@ func evalAssignmentExression(
 	node *ast.InfixExpression,
 	env *object.Environment,
 ) object.Object {
-	lhs, ok := node.Left.(*ast.Identifier)
-	if !ok {
+
+	switch lhs := node.Left.(type) {
+	case *ast.Identifier:
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
+		}
+
+		left, e := env.Get(lhs.Value)
+		if e == nil {
+			return &object.Error{Message: fmt.Sprintf("variable %s not found", lhs.Value)}
+		}
+
+		op := node.Operator[0]
+		switch op {
+		case '=':
+			e.Set(lhs.Value, right)
+		default:
+			result := evalInfixExpression(string(op), left, right)
+			if result.Type() == object.ERROR_OBJ {
+				return result
+			}
+			e.Set(lhs.Value, result)
+		}
+		left, _ = env.Get(lhs.Value)
+		return left
+
+	case *ast.IndexExpression:
+		// TODO:
+		return newError("Not implemented")
+
+	default:
 		return newError("Invalid LHS in assignment")
 	}
-
-	right := Eval(node.Right, env)
-	if isError(right) {
-		return right
-	}
-
-	left, e := env.Get(lhs.Value)
-	if e == nil {
-		return &object.Error{Message: fmt.Sprintf("variable %s not found", lhs.Value)}
-	}
-
-	op := node.Operator[0]
-	switch op {
-	case '=':
-		e.Set(lhs.Value, right)
-	default:
-		result := evalInfixExpression(string(op), left, right)
-		if result.Type() == object.ERROR_OBJ {
-			return result
-		}
-		e.Set(lhs.Value, result)
-	}
-	left, _ = env.Get(lhs.Value)
-	return left
 }
 
 func evalIntegerInfixExpression(
