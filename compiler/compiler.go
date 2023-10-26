@@ -370,9 +370,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
-		err := c.Compile(node.Value)
-		if err != nil {
-			return err
+		if node.Value != nil {
+			err := c.Compile(node.Value)
+			if err != nil {
+				return err
+			}
+		} else {
+			c.emit(code.OpNull)
 		}
 
 		if symbol.Scope == GlobalScope {
