@@ -4,6 +4,7 @@ import (
 	"chimp/ast"
 	"chimp/code"
 	"chimp/object"
+	"chimp/parser"
 	"fmt"
 	"sort"
 )
@@ -81,6 +82,51 @@ func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
 	return compiler
 }
 
+func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
+	switch lhs := node.Left.(type) {
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(lhs.Value)
+		if !ok {
+			return fmt.Errorf("undefined variable %s", lhs.Value)
+		}
+
+		err := c.Compile(node.Left)
+		if err != nil {
+			return err
+		}
+
+		err = c.Compile(node.Right)
+		if err != nil {
+			return err
+		}
+
+		switch node.Operator {
+		case "+=":
+			c.emit(code.OpAdd)
+		case "-=":
+			c.emit(code.OpSub)
+		case "*=":
+			c.emit(code.OpMul)
+		case "/=":
+			c.emit(code.OpDiv)
+		case "%=":
+			c.emit(code.OpMod)
+		default:
+			/* do nothing */
+		}
+
+		if symbol.Scope == GlobalScope {
+			c.emit(code.OpSetGlobalNoPop, symbol.Index)
+		} else {
+			c.emit(code.OpSetLocalNoPop, symbol.Index)
+		}
+
+	default:
+		return fmt.Errorf("invalid left hand side value in assignment")
+	}
+	return nil
+}
+
 func (c *Compiler) Compile(node ast.Node) error {
 	switch node := node.(type) {
 	case *ast.Program:
@@ -99,6 +145,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpPop)
 
 	case *ast.InfixExpression:
+		if parser.IsAssignmentOperator(node.Operator) {
+			return c.CompileAssignment(node)
+		}
+
 		if node.Operator == "<" {
 			err := c.Compile(node.Right)
 			if err != nil {
@@ -126,16 +176,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 		switch node.Operator {
 		case "+":
 			c.emit(code.OpAdd)
-		case "+=":
 		case "-":
 			c.emit(code.OpSub)
-		case "-=":
 		case "*":
 			c.emit(code.OpMul)
-		case "*=":
 		case "/":
 			c.emit(code.OpDiv)
-		case "/=":
 		case ">":
 			c.emit(code.OpGreaterThan)
 		case "==":

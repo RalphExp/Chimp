@@ -136,6 +136,12 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpSetGlobalNoPop:
+			globalIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			vm.globals[globalIndex] = vm.top()
+
 		case code.OpSetGlobal:
 			globalIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
@@ -216,6 +222,14 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpSetLocalNoPop:
+			localIndex := code.ReadUint8(ins[ip+1:])
+			vm.currentFrame().ip += 1
+
+			frame := vm.currentFrame()
+
+			vm.stack[frame.basePointer+int(localIndex)] = vm.top()
+
 		case code.OpSetLocal:
 			localIndex := code.ReadUint8(ins[ip+1:])
 			vm.currentFrame().ip += 1
@@ -289,6 +303,11 @@ func (vm *VM) push(o object.Object) error {
 	return nil
 }
 
+func (vm *VM) top() object.Object {
+	o := vm.stack[vm.sp-1]
+	return o
+}
+
 func (vm *VM) pop() object.Object {
 	o := vm.stack[vm.sp-1]
 	vm.sp--
@@ -331,6 +350,8 @@ func (vm *VM) executeBinaryIntegerOperation(
 		result = leftValue * rightValue
 	case code.OpDiv:
 		result = leftValue / rightValue
+	case code.OpMod:
+		result = leftValue % rightValue
 	default:
 		return fmt.Errorf("unknown integer operator: %d", op)
 	}

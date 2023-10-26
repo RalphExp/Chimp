@@ -58,6 +58,7 @@ const (
 	OpSub
 	OpMul
 	OpDiv
+	OpMod
 	OpTrue
 	OpFalse
 	OpEqual
@@ -70,14 +71,18 @@ const (
 	OpNull
 	OpGetGlobal
 	OpSetGlobal
+	OpSetGlobalNoPop
 	OpArray
 	OpHash
 	OpIndex
+	OpSetIndex
+	OpSetHash
 	OpCall
 	OpReturnValue
 	OpReturn
 	OpGetLocal
 	OpSetLocal
+	OpSetLocalNoPop
 	OpGetBuiltin
 	OpClosure
 	OpGetFree
@@ -96,6 +101,7 @@ var definitions = map[Opcode]*Definition{
 	OpSub:            {"OpSub", []int{}},
 	OpMul:            {"OpMul", []int{}},
 	OpDiv:            {"OpDiv", []int{}},
+	OpMod:            {"OpMod", []int{}},
 	OpTrue:           {"OpTrue", []int{}},
 	OpFalse:          {"OpFalse", []int{}},
 	OpEqual:          {"OpEqual", []int{}},
@@ -108,14 +114,18 @@ var definitions = map[Opcode]*Definition{
 	OpNull:           {"OpNull", []int{}},
 	OpGetGlobal:      {"OpGetGlobal", []int{2}},
 	OpSetGlobal:      {"OpSetGlobal", []int{2}},
+	OpSetGlobalNoPop: {"OpSetGlobalNoPop", []int{2}},
 	OpArray:          {"OpArray", []int{2}},
-	OpHash:           {"OpHash", []int{2}},
 	OpIndex:          {"OpIndex", []int{}},
+	OpSetIndex:       {"OpSetIndex", []int{}}, // TODO
+	OpHash:           {"OpHash", []int{2}},
+	OpSetHash:        {"OpSetHash", []int{}}, // TODO
 	OpCall:           {"OpCall", []int{1}},
 	OpReturnValue:    {"OpReturnValue", []int{}},
 	OpReturn:         {"OpReturn", []int{}},
 	OpGetLocal:       {"OpGetLocal", []int{1}},
 	OpSetLocal:       {"OpSetLocal", []int{1}},
+	OpSetLocalNoPop:  {"OpSetLocalNoPop", []int{1}},
 	OpGetBuiltin:     {"OpGetBuiltin", []int{1}},
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},

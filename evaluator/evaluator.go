@@ -260,14 +260,14 @@ func evalAssignmentExression(
 
 	switch lhs := node.Left.(type) {
 	case *ast.Identifier:
-		right := Eval(node.Right, env)
-		if isError(right) {
-			return right
-		}
-
 		left, e := env.Get(lhs.Value)
 		if e == nil {
 			return &object.Error{Message: fmt.Sprintf("variable %s not found", lhs.Value)}
+		}
+
+		right := Eval(node.Right, env)
+		if isError(right) {
+			return right
 		}
 
 		op := node.Operator[0]
@@ -289,7 +289,7 @@ func evalAssignmentExression(
 		return newError("Not implemented")
 
 	default:
-		return newError("Invalid LHS in assignment")
+		return newError("Invalid left hand side value in assignment")
 	}
 }
 
