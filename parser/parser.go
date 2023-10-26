@@ -212,6 +212,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	// chimp's new feature
+	case token.FOR:
+		return p.parseForStatement()
 	case token.WHILE:
 		return p.parseWhileStatement()
 	case token.DO:
@@ -427,6 +429,10 @@ func (p *Parser) parseContinueStatement() *ast.ContinueStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseForStatement() *ast.ForStatement {
+	return nil
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {

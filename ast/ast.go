@@ -227,6 +227,27 @@ func (ie *IfStatement) String() string {
 	return out.String()
 }
 
+type ForStatement struct {
+	Token     token.Token
+	Init      Statement
+	Condition Expression
+	Increment Expression
+	Statement Statement
+}
+
+func (fs *ForStatement) statementNode()       {}
+func (fs *ForStatement) TokenLiteral() string { return fs.Token.Literal }
+func (fs *ForStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for")
+	out.WriteString(fs.Init.String())
+	out.WriteString(fs.Condition.String())
+	out.WriteString(fs.Increment.String())
+	out.WriteString(fs.Statement.String())
+	return out.String()
+}
+
 // While Statement
 type WhileStatement struct {
 	Token     token.Token // the while token
