@@ -13,9 +13,9 @@ type Frame struct {
 
 func NewFrame(cl *object.Closure, basePointer int) *Frame {
 	f := &Frame{
-		cl:          cl,
-		ip:          -1,
-		basePointer: basePointer,
+		cl:          cl,          // closure object
+		ip:          -1,          // instruction pointer
+		basePointer: basePointer, // XXX: base pointer points to callee(the current function) + 1
 	}
 
 	return f

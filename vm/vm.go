@@ -212,7 +212,7 @@ func (vm *VM) Run() error {
 			frame := vm.popFrame()
 			vm.sp = frame.basePointer - 1
 
-			err := vm.push(returnValue)
+			err := vm.push(returnValue) // XXX: returnValue overwrite the function object
 			if err != nil {
 				return err
 			}
@@ -221,7 +221,7 @@ func (vm *VM) Run() error {
 			frame := vm.popFrame()
 			vm.sp = frame.basePointer - 1
 
-			err := vm.push(Null)
+			err := vm.push(Null) // XXX: returnValue overwrite the function object
 			if err != nil {
 				return err
 			}
@@ -542,7 +542,7 @@ func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 			cl.Fn.NumParameters, numArgs)
 	}
 
-	frame := NewFrame(cl, vm.sp-numArgs)
+	frame := NewFrame(cl, vm.sp-numArgs) // XXX: sp-numArgs points to callee + 1
 	vm.pushFrame(frame)
 
 	vm.sp = frame.basePointer + cl.Fn.NumLocals
