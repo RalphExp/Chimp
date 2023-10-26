@@ -22,14 +22,14 @@ const (
 	DEC
 	PLUS
 	MINUS
-	BANG     // !
-	ASTERISK // "*"
-	SLASH    // "/"
-	MOD      // "%"
-	LT       // "<"
-	GT       // ">"
-	EQ       // "=="
-	NOT_EQ   // "!="
+	BANG   // !
+	MUL    // "*"
+	DIV    // "/"
+	MOD    // "%"
+	LT     // "<"
+	GT     // ">"
+	EQ     // "=="
+	NOT_EQ // "!="
 	// Delimiters
 	COMMA     // ","
 	SEMICOLON // ";"
@@ -96,8 +96,8 @@ var token2name = map[int]string{
 	PLUS:       "+",
 	MINUS:      "-",
 	BANG:       "!",
-	ASTERISK:   "*",
-	SLASH:      "/",
+	MUL:        "*",
+	DIV:        "/",
 	MOD:        "%",
 	LT:         "<",
 	GT:         ">",

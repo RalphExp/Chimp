@@ -3,6 +3,7 @@ package evaluator
 import (
 	"chimp/ast"
 	"chimp/object"
+	"chimp/parser"
 	"fmt"
 )
 
@@ -46,27 +47,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		env.Set(node.Name.Value, val)
 		return NULL
 
-	case *ast.AssignmentStatement:
-		// FIXME: we need an lValue?
-		left, e := env.Get(node.Name.Value)
-		if e == nil {
-			return &object.Error{Message: fmt.Sprintf("variable %s not found", node.Name.Value)}
-		}
-
-		right := Eval(node.Value, env)
-		if isError(right) {
-			return right
-		}
-
-		op := node.Operator[0]
-		switch op {
-		case '=':
-			e.Set(node.Name.Value, right)
-		default:
-			e.Set(node.Name.Value, evalInfixExpression(string(op), left, right))
-		}
-		return NULL
-
 	// Expressions
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
@@ -85,6 +65,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalPrefixExpression(node.Operator, right)
 
 	case *ast.InfixExpression:
+		if parser.IsAssignmentOperator(node.Operator) {
+			return evalAssignmentExression(node, env)
+		}
+
 		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
@@ -151,7 +135,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
-
 	}
 
 	return NULL
@@ -268,6 +251,40 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 	value := right.(*object.Integer).Value
 	return &object.Integer{Value: -value}
+}
+
+func evalAssignmentExression(
+	node *ast.InfixExpression,
+	env *object.Environment,
+) object.Object {
+	lhs, ok := node.Left.(*ast.Identifier)
+	if !ok {
+		return newError("Invalid LHS in assignment")
+	}
+
+	right := Eval(node.Right, env)
+	if isError(right) {
+		return right
+	}
+
+	left, e := env.Get(lhs.Value)
+	if e == nil {
+		return &object.Error{Message: fmt.Sprintf("variable %s not found", lhs.Value)}
+	}
+
+	op := node.Operator[0]
+	switch op {
+	case '=':
+		e.Set(lhs.Value, right)
+	default:
+		result := evalInfixExpression(string(op), left, right)
+		if result.Type() == object.ERROR_OBJ {
+			return result
+		}
+		e.Set(lhs.Value, result)
+	}
+	left, _ = env.Get(lhs.Value)
+	return left
 }
 
 func evalIntegerInfixExpression(

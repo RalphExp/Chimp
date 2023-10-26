@@ -90,7 +90,7 @@ func (l *Lexer) NextToken() token.Token {
 			literal := "/="
 			tok = token.Token{Type: token.DIV_ASSIGN, Literal: literal}
 		} else {
-			tok = newToken(token.SLASH, '/')
+			tok = newToken(token.DIV, '/')
 		}
 	case '*':
 		if l.getChar() == '=' {
@@ -98,7 +98,7 @@ func (l *Lexer) NextToken() token.Token {
 			literal := "*="
 			tok = token.Token{Type: token.MUL_ASSIGN, Literal: literal}
 		} else {
-			tok = newToken(token.ASTERISK, '*')
+			tok = newToken(token.MUL, '*')
 		}
 	case '%':
 		if l.getChar() == '=' {

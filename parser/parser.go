@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	_ int = iota
+	_ int = iota * 10
 	LOWEST
+	ASSIGN      // =|+=|-=|*=|/=|%=
 	EQUALS      // ==
 	LESSGREATER // > or <
 	SUM         // +
@@ -21,26 +22,37 @@ const (
 )
 
 var precedences = map[token.TokenType]int{
-	token.EQ:       EQUALS,      // == 2
-	token.NOT_EQ:   EQUALS,      // != 2
-	token.LT:       LESSGREATER, // <  3
-	token.GT:       LESSGREATER, // >  3
-	token.PLUS:     SUM,         // +  4
-	token.MINUS:    SUM,         // -  4
-	token.SLASH:    PRODUCT,     // /  5
-	token.ASTERISK: PRODUCT,     // *  5
-	token.MOD:      PRODUCT,     // %  5
-	token.LPAREN:   CALL,        // () 7
-	token.LBRACKET: INDEX,       // [] 8
+	token.ASSIGN:     ASSIGN,
+	token.ADD_ASSIGN: ASSIGN,
+	token.SUB_ASSIGN: ASSIGN,
+	token.MUL_ASSIGN: ASSIGN,
+	token.DIV_ASSIGN: ASSIGN,
+	token.MOD_ASSIGN: ASSIGN,
+	token.EQ:         EQUALS,      // == 2
+	token.NOT_EQ:     EQUALS,      // != 2
+	token.LT:         LESSGREATER, // <  3
+	token.GT:         LESSGREATER, // >  3
+	token.PLUS:       SUM,         // +  4
+	token.MINUS:      SUM,         // -  4
+	token.MUL:        PRODUCT,     // /  5
+	token.DIV:        PRODUCT,     // *  5
+	token.MOD:        PRODUCT,     // %  5
+	token.LPAREN:     CALL,        // () 7
+	token.LBRACKET:   INDEX,       // [] 8
 }
 
-var assignmentOp = map[token.TokenType]bool{
-	token.ASSIGN:     true,
-	token.ADD_ASSIGN: true,
-	token.SUB_ASSIGN: true,
-	token.MUL_ASSIGN: true,
-	token.DIV_ASSIGN: true,
-	token.MOD_ASSIGN: true,
+var assignmentOp = map[string]bool{
+	"=":  true,
+	"+=": true,
+	"-=": true,
+	"*=": true,
+	"/=": true,
+	"%=": true,
+}
+
+func IsAssignmentOperator(op string) bool {
+	_, ok := assignmentOp[op]
+	return ok
 }
 
 type (
@@ -80,10 +92,16 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.ADD_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.SUB_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.MUL_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.DIV_ASSIGN, p.parseInfixExpression)
+	p.registerInfix(token.MOD_ASSIGN, p.parseInfixExpression)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
-	p.registerInfix(token.SLASH, p.parseInfixExpression)
-	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.MUL, p.parseInfixExpression)
+	p.registerInfix(token.DIV, p.parseInfixExpression)
 	p.registerInfix(token.MOD, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
@@ -133,12 +151,6 @@ func (p *Parser) curTokenIs(t token.TokenType) bool {
 func (p *Parser) peekTokenIs(t token.TokenType) bool {
 	p.PeekToken()
 	return p.peekToken.Type == t
-}
-
-func (p *Parser) peekTokenIsAssignment() bool {
-	p.PeekToken()
-	_, ok := assignmentOp[p.PeekToken().Type]
-	return ok
 }
 
 func (p *Parser) expectPeek(t token.TokenType) bool {
@@ -212,40 +224,9 @@ func (p *Parser) parseStatement() ast.Statement {
 		fallthrough
 	case token.EOF:
 		return nil
-	case token.IDENT:
-		if p.peekTokenIsAssignment() {
-			return p.parseAssignmentStatement()
-		}
-		fallthrough
 	default:
 		return p.parseExpressionStatement()
 	}
-}
-
-func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
-	stmt := &ast.AssignmentStatement{
-		Token: p.GetToken(),
-		Name:  &ast.Identifier{Token: p.GetToken(), Value: p.GetToken().Literal}}
-
-	p.nextToken()
-
-	stmt.Operator = p.GetToken().Literal
-
-	p.nextToken()
-
-	stmt.Value = p.parseExpression(LOWEST)
-
-	if fl, ok := stmt.Value.(*ast.FunctionLiteral); ok {
-		if fl.Name == "" {
-			fl.Name = stmt.Name.Value
-		}
-	}
-
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
-
-	return stmt
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {
@@ -322,6 +303,11 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 	leftExp := prefix()
+
+	// assign is right association, need to decrease precedence
+	if precedence == ASSIGN {
+		precedence--
+	}
 
 	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.PeekToken().Type]
