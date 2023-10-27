@@ -542,10 +542,12 @@ func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 			cl.Fn.NumParameters, numArgs)
 	}
 
-	frame := NewFrame(cl, vm.sp-numArgs) // XXX: sp-numArgs points to callee + 1
+	frame := NewFrame(cl, vm.sp-numArgs) // sp-numArgs points to callee + 1
 	vm.pushFrame(frame)
 
-	vm.sp = frame.basePointer + cl.Fn.NumLocals // allocate spaces for local variables
+	// allocate spaces for parameters and local variables
+	// cl.Fn.NumLocals = number of parameters + number fo local variables
+	vm.sp = frame.basePointer + cl.Fn.NumLocals
 
 	return nil
 }
