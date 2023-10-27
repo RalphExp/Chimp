@@ -32,6 +32,8 @@ if (5 < 10) {
 {"foo": "bar"}
 
 ten += 10
+
+let f1;
 `
 
 	tests := []struct {
@@ -127,6 +129,9 @@ ten += 10
 		{token.IDENT, "ten"},
 		{token.ADD_ASSIGN, "+="},
 		{token.INT, "10"},
+		{token.LET, "let"},
+		{token.IDENT, "f1"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 

@@ -205,7 +205,7 @@ func (l *Lexer) readNext(inc bool) {
 
 func (l *Lexer) readIdentifier() string {
 	id := []byte{l.ch}
-	for isLetter(l.getChar()) {
+	for isLetter(l.getChar()) || isDigit(l.getChar()) {
 		id = append(id, l.readChar())
 	}
 	return string(id)
