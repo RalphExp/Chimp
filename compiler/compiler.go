@@ -314,7 +314,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		jmpToEnd := c.emit(code.OpJumpNotTruthy, -1)
 
-		err = c.Compile(node.Statement)
+		err = c.Compile(node.Body)
 		if err != nil {
 			return err
 		}
@@ -344,7 +344,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		restart = len(c.currentInstructions())
 
-		err := c.Compile(node.Statement)
+		err := c.Compile(node.Body)
 		if err != nil {
 			return err
 		}

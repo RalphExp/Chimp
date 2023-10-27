@@ -453,10 +453,10 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 
 	if p.peekTokenIs(token.LBRACE) {
 		p.nextToken()
-		statement.Statement = p.parseBlockStatement()
+		statement.Body = p.parseBlockStatement()
 	} else {
 		p.nextToken()
-		statement.Statement = p.parseStatement()
+		statement.Body = p.parseStatement()
 	}
 
 	return statement
@@ -467,10 +467,10 @@ func (p *Parser) parseDoWhileStatement() ast.Statement {
 
 	if p.peekTokenIs(token.LBRACE) {
 		p.nextToken()
-		statement.Statement = p.parseBlockStatement()
+		statement.Body = p.parseBlockStatement()
 	} else {
 		p.nextToken()
-		statement.Statement = p.parseStatement()
+		statement.Body = p.parseStatement()
 	}
 
 	if !p.expectPeek(token.WHILE) {

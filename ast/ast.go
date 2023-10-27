@@ -252,7 +252,7 @@ func (fs *ForStatement) String() string {
 type WhileStatement struct {
 	Token     token.Token // the while token
 	Condition Expression
-	Statement Statement
+	Body      Statement
 }
 
 func (ws *WhileStatement) statementNode()       {}
@@ -262,14 +262,14 @@ func (ws *WhileStatement) String() string {
 
 	out.WriteString("while")
 	out.WriteString(ws.Condition.String())
-	out.WriteString(ws.Statement.String())
+	out.WriteString(ws.Body.String())
 	return out.String()
 }
 
 // While Statement
 type DoWhileStatement struct {
 	Token     token.Token // the while token
-	Statement Statement
+	Body      Statement
 	Condition Expression
 }
 
@@ -279,7 +279,7 @@ func (dw *DoWhileStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("do")
-	out.WriteString(dw.Statement.String())
+	out.WriteString(dw.Body.String())
 	out.WriteString("while")
 	out.WriteString(dw.Condition.String())
 	return out.String()

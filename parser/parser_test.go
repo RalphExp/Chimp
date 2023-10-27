@@ -139,6 +139,44 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 }
 
+func TestParsingWhileStatements(t *testing.T) {
+	input := `
+	while (true) {
+	  puts("hello");
+	  while (true) {
+	    puts("world");
+	    break;
+	  }
+	  break;
+	}
+`
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.WhileStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.WhileStatement. got=%T",
+			program.Statements[0])
+	}
+
+	block, ok := stmt.Body.(*ast.BlockStatement)
+	if !ok {
+		t.Fatalf("stmt.Body is not *ast.BlockStatement. got=%T", block)
+	}
+
+	if len(block.Statements) != 3 {
+		t.Fatalf("body has %d statements, want=3",
+			len(program.Statements))
+	}
+}
+
 func TestParsingPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
 		input    string

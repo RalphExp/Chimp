@@ -379,7 +379,7 @@ func evalWhileStatement(ws *ast.WhileStatement,
 			return condition
 		}
 		if isTruthy(condition) {
-			obj := Eval(ws.Statement, env)
+			obj := Eval(ws.Body, env)
 			if isError(obj) {
 				return obj
 			}
@@ -407,8 +407,13 @@ func evalDoWhileStatement(
 	env.PushBreakContext()
 	env.PushContinueContext()
 
+	defer func() {
+		env.PopBreakContext()
+		env.PopContinueContext()
+	}()
+
 	for {
-		obj := Eval(dw.Statement, env)
+		obj := Eval(dw.Body, env)
 		if isError(obj) {
 			return obj
 		}
@@ -433,10 +438,6 @@ func evalDoWhileStatement(
 		break
 	}
 
-	defer func() {
-		env.PopBreakContext()
-		env.PopContinueContext()
-	}()
 	return NULL
 }
 
