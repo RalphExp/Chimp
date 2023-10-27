@@ -21,7 +21,7 @@ type Lexer struct {
 
 /* XXX: the original version of the lexer read too many characters ahead,
  * since we have to implement a better REPL, we should let the lexer read
- * as less as possible for further parsing by the parser. */
+ * as less as possible.*/
 func New(reader io.Reader) *Lexer {
 	l := &Lexer{
 		scanner:  bufio.NewScanner(reader),

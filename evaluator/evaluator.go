@@ -90,6 +90,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.DoWhileStatement:
 		return evalDoWhileStatement(node, env)
 
+	case *ast.ForStatement:
+		// TODO:
+		return nil
+
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 

@@ -23,7 +23,9 @@ test:
 	@echo testing vm ... && go test vm/*
 
 benchmark:
-	go run benchmark/main.go
+	@echo running benchmark ...
+	@go run benchmark/main.go
+	@echo done
 
 clean:
 	rm -rf chimp 
