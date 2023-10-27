@@ -22,7 +22,7 @@ type VM struct {
 	globals     []object.Object
 	frames      []*Frame
 	framesIndex int
-	bp          int // base pointer is used for block scope
+	savedSp     []int // base pointer is used for block scope
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -37,7 +37,7 @@ func New(bytecode *compiler.Bytecode) *VM {
 		constants:   bytecode.Constants,
 		stack:       make([]object.Object, StackSize),
 		sp:          0,
-		bp:          -1,
+		savedSp:     make([]int, 0),
 		globals:     make([]object.Object, GlobalsSize),
 		frames:      frames,
 		framesIndex: 1,
@@ -84,11 +84,12 @@ func (vm *VM) Run() error {
 			vm.pop()
 
 		case code.OpSaveSp:
-			vm.bp = vm.sp
+			vm.savedSp = append(vm.savedSp, vm.sp)
 
 		case code.OpRestoreSp:
-			vm.sp = vm.bp
-			vm.bp = -1
+			l := len(vm.savedSp)
+			vm.sp = vm.savedSp[l-1]
+			vm.savedSp = vm.savedSp[0 : l-1]
 
 		case code.OpAdd,
 			code.OpSub,
