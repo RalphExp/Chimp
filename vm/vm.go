@@ -22,6 +22,7 @@ type VM struct {
 	globals     []object.Object
 	frames      []*Frame
 	framesIndex int
+	bp          int // base pointer is used for block scope
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -36,6 +37,7 @@ func New(bytecode *compiler.Bytecode) *VM {
 		constants:   bytecode.Constants,
 		stack:       make([]object.Object, StackSize),
 		sp:          0,
+		bp:          -1,
 		globals:     make([]object.Object, GlobalsSize),
 		frames:      frames,
 		framesIndex: 1,
@@ -80,6 +82,13 @@ func (vm *VM) Run() error {
 
 		case code.OpPop:
 			vm.pop()
+
+		case code.OpSaveSp:
+			vm.bp = vm.sp
+
+		case code.OpRestoreSp:
+			vm.sp = vm.bp
+			vm.bp = -1
 
 		case code.OpAdd,
 			code.OpSub,
@@ -545,8 +554,9 @@ func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 	frame := NewFrame(cl, vm.sp-numArgs) // XXX: sp-numArgs points to callee + 1
 	vm.pushFrame(frame)
 
-	vm.sp = frame.basePointer + cl.Fn.NumLocals // allocate spaces for local variables
-
+	// allocate spaces for parameters and local variables
+	// cl.Fn.NumLocals = number of parameters + number fo local variables
+	vm.sp = frame.basePointer + cl.Fn.NumLocals
 	return nil
 }
 

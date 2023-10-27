@@ -41,6 +41,7 @@ func New() *Compiler {
 		previousInstruction: EmittedInstruction{},
 	}
 
+	// XXX: pass the compiler to symbol table??
 	symbolTable := NewSymbolTable()
 
 	for i, v := range object.Builtins {
@@ -123,6 +124,29 @@ func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
 
 	default:
 		return fmt.Errorf("invalid left hand side value in assignment")
+	}
+	return nil
+}
+
+func (c *Compiler) CompileBlockStatement(
+	node *ast.BlockStatement,
+) error {
+	// XXX: to implement block scope, we need to save the stack pointer
+	// at the beginning, and restore the sp when exiting the block
+
+	c.emit(code.OpSaveSp)
+
+	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
+	defer func() {
+		c.symbolTable = c.symbolTable.Outer
+		c.emit(code.OpRestoreSp)
+	}()
+
+	for _, s := range node.Statements {
+		err := c.Compile(s)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -363,12 +387,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// before compiling while statement
 
 	case *ast.BlockStatement:
-		for _, s := range node.Statements {
-			err := c.Compile(s)
-			if err != nil {
-				return err
-			}
-		}
+		return c.CompileBlockStatement(node)
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
@@ -451,7 +470,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.symbolTable.Define(p.Value)
 		}
 
-		err := c.Compile(node.Body)
+		err := c.CompileBlockStatement(node.Body)
 		if err != nil {
 			return err
 		}
@@ -459,6 +478,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if c.lastInstructionIs(code.OpPop) {
 			c.replaceLastPopWithReturn()
 		}
+
 		if !c.lastInstructionIs(code.OpReturnValue) {
 			c.emit(code.OpReturn)
 		}
@@ -502,7 +522,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpCall, len(node.Arguments))
-
 	}
 
 	return nil
@@ -590,9 +609,9 @@ func (c *Compiler) enterScope() {
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
+
 	c.scopes = append(c.scopes, scope)
 	c.scopeIndex++
-
 	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 }
 
@@ -601,7 +620,6 @@ func (c *Compiler) leaveScope() code.Instructions {
 
 	c.scopes = c.scopes[:len(c.scopes)-1]
 	c.scopeIndex--
-
 	c.symbolTable = c.symbolTable.Outer
 
 	return instructions

@@ -87,6 +87,8 @@ const (
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
+	OpSaveSp    // save stack pointer
+	OpRestoreSp // restore stack pointer
 )
 
 type Definition struct {
