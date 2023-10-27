@@ -177,6 +177,41 @@ func TestParsingWhileStatements(t *testing.T) {
 	}
 }
 
+func TestParsingDoWhileStatements(t *testing.T) {
+	input := `
+	let a = 0;
+	do {
+	  puts(a);
+      a += 2;
+	} while (a < 10);
+`
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("program has not enough statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[1].(*ast.DoWhileStatement)
+	if !ok {
+		t.Fatalf("program.Statements[1] is not *ast.DoWhileStatement. got=%T",
+			program.Statements[1])
+	}
+
+	block, ok := stmt.Body.(*ast.BlockStatement)
+	if !ok {
+		t.Fatalf("stmt.Body is not *ast.BlockStatement. got=%T", block)
+	}
+
+	if len(block.Statements) != 2 {
+		t.Fatalf("body has %d statements, want=2",
+			len(program.Statements))
+	}
+}
+
 func TestParsingPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
 		input    string
