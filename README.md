@@ -1,5 +1,5 @@
 ## Chimp Language
-A toy language with VM, extending Monkey
+A javascript like language with VM, extending Monkey
 
 ### New Features
 - a enhanced REPL shell and interpreter
