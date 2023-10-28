@@ -83,14 +83,6 @@ func (vm *VM) Run() error {
 		case code.OpPop:
 			vm.pop()
 
-		case code.OpSaveSp:
-			vm.savedSp = append(vm.savedSp, vm.sp)
-
-		case code.OpRestoreSp:
-			l := len(vm.savedSp)
-			vm.sp = vm.savedSp[l-1]
-			vm.savedSp = vm.savedSp[0 : l-1]
-
 		case code.OpAdd,
 			code.OpSub,
 			code.OpMul,
