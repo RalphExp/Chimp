@@ -130,16 +130,15 @@ func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
 
 func (c *Compiler) CompileBlockStatement(
 	node *ast.BlockStatement,
+	newFrame bool,
 ) error {
-	// XXX: to implement block scope, we need to save the stack pointer
-	// at the beginning, and restore the sp when exiting the block
-
-	c.emit(code.OpSaveSp)
-
 	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
+	// if !newFrame {
+	// 	c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+	// }
+
 	defer func() {
 		c.symbolTable = c.symbolTable.Outer
-		c.emit(code.OpRestoreSp)
 	}()
 
 	for _, s := range node.Statements {
@@ -387,7 +386,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// before compiling while statement
 
 	case *ast.BlockStatement:
-		return c.CompileBlockStatement(node)
+		return c.CompileBlockStatement(node, false)
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
@@ -470,7 +469,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.symbolTable.Define(p.Value)
 		}
 
-		err := c.CompileBlockStatement(node.Body)
+		err := c.CompileBlockStatement(node.Body, true)
 		if err != nil {
 			return err
 		}
