@@ -132,14 +132,17 @@ func (c *Compiler) CompileBlockStatement(
 	node *ast.BlockStatement,
 	newFrame bool,
 ) error {
-	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
-	// if !newFrame {
-	// 	c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
-	// }
+	if !newFrame {
+		// if the block is not introduced by a function, i.e. by if, while, ... etc
+		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
+		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+		constants := len(c.constants)
 
-	defer func() {
-		c.symbolTable = c.symbolTable.Outer
-	}()
+		defer func() {
+			c.symbolTable = c.symbolTable.Outer
+			c.constants = c.constants[0 : constants+1]
+		}()
+	}
 
 	for _, s := range node.Statements {
 		err := c.Compile(s)
