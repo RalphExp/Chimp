@@ -543,6 +543,9 @@ func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 	}
 
 	frame := NewFrame(cl, vm.sp-numArgs) // sp-numArgs points to callee + 1
+
+	// when a new frame is pushed, the ip will point to the
+	// beginning instruction of the new function
 	vm.pushFrame(frame)
 
 	// allocate spaces for parameters and local variables
