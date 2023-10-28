@@ -87,8 +87,6 @@ const (
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
-	OpSaveSp    // save stack pointer
-	OpRestoreSp // restore stack pointer
 )
 
 type Definition struct {
@@ -132,8 +130,6 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}},
-	OpSaveSp:         {"OpSaveSp", []int{}},
-	OpRestoreSp:      {"OpRestoreSp", []int{}},
 }
 
 func Lookup(op byte) (*Definition, error) {
