@@ -22,7 +22,6 @@ type VM struct {
 	globals     []object.Object
 	frames      []*Frame
 	framesIndex int
-	savedSp     []int // base pointer is used for block scope
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -37,7 +36,6 @@ func New(bytecode *compiler.Bytecode) *VM {
 		constants:   bytecode.Constants,
 		stack:       make([]object.Object, StackSize),
 		sp:          0,
-		savedSp:     make([]int, 0),
 		globals:     make([]object.Object, GlobalsSize),
 		frames:      frames,
 		framesIndex: 1,
