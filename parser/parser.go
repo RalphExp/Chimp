@@ -211,7 +211,6 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseIfStatment()
 	case token.RETURN:
 		return p.parseReturnStatement()
-	// chimp's new feature
 	case token.FOR:
 		return p.parseForStatement()
 	case token.WHILE:
@@ -275,14 +274,16 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{Token: p.GetToken()}
 
-	p.nextToken()
-
-	stmt.ReturnValue = p.parseExpression(LOWEST)
-
+	// support return statement without value, in this case
+	// nil will be implicitly as a return value
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
+		stmt.ReturnValue = &ast.Null{}
+		return stmt
 	}
 
+	p.nextToken()
+	stmt.ReturnValue = p.parseExpression(LOWEST)
 	return stmt
 }
 
