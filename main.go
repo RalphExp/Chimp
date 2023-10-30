@@ -25,6 +25,9 @@ func main() {
 		}
 	}
 
+	// s := `let cd = func(x) { puts(x); if (x == 0) return; else return cd(x-1) };`
+	// in := strings.NewReader(s)
+
 	fmt.Printf("engine [interpreter]\n")
 	interpretor.Start(os.Stdin, os.Stdout)
 }
