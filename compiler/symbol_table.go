@@ -70,7 +70,7 @@ func (s *SymbolTable) Define(name string) Symbol {
 // }
 
 func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
-	sameFunc := true
+	inSameFunc := true
 	obj, ok := s.store[name]
 	if ok {
 		return obj, ok
@@ -82,14 +82,17 @@ func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
 
 	for {
 		obj, ok := s.store[name]
+		if !s.block {
+			inSameFunc = false
+		}
+
 		if ok {
-			if obj.Scope == GlobalScope || obj.Scope == BuiltinScope {
+			if obj.Scope == GlobalScope ||
+				obj.Scope == BuiltinScope ||
+				obj.Scope == FunctionScope {
 				return obj, ok
 			}
-			if !s.block {
-				sameFunc = false
-			}
-			if !sameFunc {
+			if !inSameFunc {
 				free := s.defineFree(obj)
 				return free, true
 			}
