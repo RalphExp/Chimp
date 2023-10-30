@@ -136,6 +136,7 @@ func (c *Compiler) CompileBlockStatement(
 		// if the block is not introduced by a function, i.e. by if, while, ... etc
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+		c.symbolTable.block = true
 		c.emit(code.OpSaveSp)
 
 		defer func() {

@@ -21,6 +21,7 @@ type SymbolTable struct {
 
 	store          map[string]Symbol
 	numDefinitions int
+	block          bool // introduced by block
 
 	FreeSymbols []Symbol
 }
@@ -50,22 +51,54 @@ func (s *SymbolTable) Define(name string) Symbol {
 	return symbol
 }
 
+// func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
+// 	obj, ok := s.store[name]
+// 	if !ok && s.Outer != nil {
+// 		obj, ok = s.Outer.Resolve(name)
+// 		if !ok {
+// 			return obj, ok
+// 		}
+
+// 		if obj.Scope == GlobalScope || obj.Scope == BuiltinScope {
+// 			return obj, ok
+// 		}
+
+// 		free := s.defineFree(obj)
+// 		return free, true
+// 	}
+// 	return obj, ok
+// }
+
 func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
+	sameFunc := true
 	obj, ok := s.store[name]
-	if !ok && s.Outer != nil {
-		obj, ok = s.Outer.Resolve(name)
-		if !ok {
-			return obj, ok
-		}
-
-		if obj.Scope == GlobalScope || obj.Scope == BuiltinScope {
-			return obj, ok
-		}
-
-		free := s.defineFree(obj)
-		return free, true
+	if ok {
+		return obj, ok
 	}
-	return obj, ok
+	s = s.Outer
+	if s == nil {
+		return obj, ok
+	}
+
+	for {
+		obj, ok := s.store[name]
+		if ok {
+			if obj.Scope == GlobalScope || obj.Scope == BuiltinScope {
+				return obj, ok
+			}
+			if !s.block {
+				sameFunc = false
+			}
+			if !sameFunc {
+				free := s.defineFree(obj)
+				return free, true
+			}
+		}
+		s = s.Outer
+		if s == nil {
+			return obj, ok
+		}
+	}
 }
 
 func (s *SymbolTable) DefineBuiltin(index int, name string) Symbol {
