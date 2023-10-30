@@ -136,11 +136,11 @@ func (c *Compiler) CompileBlockStatement(
 		// if the block is not introduced by a function, i.e. by if, while, ... etc
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
-		constants := len(c.constants)
+		c.emit(code.OpSaveSp)
 
 		defer func() {
 			c.symbolTable = c.symbolTable.Outer
-			c.constants = c.constants[0 : constants+1]
+			c.emit(code.OpRestoreSp)
 		}()
 	}
 
