@@ -70,6 +70,7 @@ func (s *SymbolTable) Define(name string) Symbol {
 // }
 
 func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
+	originTable := s
 	inBlock := s.block
 	obj, ok := s.store[name]
 	if ok {
@@ -96,7 +97,7 @@ func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
 				}
 			}
 
-			free := s.defineFree(obj)
+			free := originTable.defineFree(obj)
 			return free, true
 		}
 
