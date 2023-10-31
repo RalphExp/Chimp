@@ -1,8 +1,9 @@
 ## Chimp Language
-A javascript like language with VM, extending Monkey
+A javascript like language with VM, extending Monkey, but with more strict syntax
 
 ### New Features
 - a enhanced REPL shell and interpreter
+- block scope
 - change if expression to if statement
 - support while statement
 - support do-while statement
@@ -10,8 +11,9 @@ A javascript like language with VM, extending Monkey
 - op-assigment +=, -=, .etc
 
 ### TODO:
-- block scope handling
+- comments
 - assignment of array/hash element
+- other features ...
 
 ### How to run
 > go run main.go [-vm|-eval]
