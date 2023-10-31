@@ -478,9 +478,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		if c.lastInstructionIs(code.OpPop) {
-			c.replaceLastPopWithReturn()
-		}
+		// XXX: Chimp force explicit return statement to
+		// return the value which is different with Monkey
+
+		// if c.lastInstructionIs(code.OpPop) {
+		// 	c.replaceLastPopWithReturn()
+		// }
 
 		if !c.lastInstructionIs(code.OpReturnValue) {
 			c.emit(code.OpReturn)

@@ -489,9 +489,9 @@ func TestClosures(t *testing.T) {
 			return func(d) { return c + d };
 		};
 		let adder = newAdder(1, 2);
-		adder(8);
+		adder(9);
 		`,
-			expected: 11,
+			expected: 12,
 		},
 		{
 			input: `
@@ -499,7 +499,7 @@ func TestClosures(t *testing.T) {
 			let c = a + b;
 			return func(d) {
 				let e = d + c;
-				func(f) { return e + f; };
+				return func(f) { return e + f; };
 			};
 		};
 		let newAdderInner = newAdderOuter(1, 2)
@@ -513,14 +513,29 @@ func TestClosures(t *testing.T) {
 		let a = 1;
 		let newAdderOuter = func(b) {
 			return func(c) {
-				func(d) { return a + b + c + d };
+				return a + b + c
+			};
+		};
+		let newAdderInner = newAdderOuter(2)
+		newAdderInner(3);
+		`,
+			expected: 6,
+		},
+		{
+			input: `
+		let a = 1;
+		let newAdderOuter = func(b) {
+			return func(c) {
+				return func(d) {
+					return a + b + c + d
+				};
 			};
 		};
 		let newAdderInner = newAdderOuter(2)
 		let adder = newAdderInner(3);
-		adder(8);
+		adder(4);
 		`,
-			expected: 14,
+			expected: 10,
 		},
 		{
 			input: `
