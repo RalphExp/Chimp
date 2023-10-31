@@ -18,6 +18,7 @@ func main() {
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
 
+	// test case
 	s := `
 	let a = 1;
 	let f1 = func(b) {

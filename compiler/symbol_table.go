@@ -70,43 +70,27 @@ func (s *SymbolTable) Define(name string) Symbol {
 // }
 
 func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
-	originTable := s
-	inBlock := s.block
 	obj, ok := s.store[name]
-	if ok {
-		return obj, ok
-	}
-	s = s.Outer
-	if s == nil {
-		return obj, ok
-	}
 
-	for {
-		obj, ok := s.store[name]
-		if ok {
-			if obj.Scope == GlobalScope ||
-				obj.Scope == BuiltinScope {
-				return obj, ok
-			}
-
-			// XXX: if the symbol belongs to the same function,
-			// it's not free variable
-			if inBlock {
-				if obj.Scope == FunctionScope || obj.Scope == LocalScope {
-					return obj, ok
-				}
-			}
-
-			free := originTable.defineFree(obj)
-			return free, true
-		}
-
-		inBlock = inBlock && s.block
-		s = s.Outer
-		if s == nil {
+	if !ok && s.Outer != nil {
+		obj, ok = s.Outer.Resolve(name)
+		if !ok {
 			return obj, ok
 		}
+
+		if obj.Scope == GlobalScope || obj.Scope == BuiltinScope {
+			return obj, ok
+		}
+
+		// handle blocks introduced by if/while/for statements
+		if s.block && obj.Scope != FreeScope {
+			return obj, ok
+		}
+
+		free := s.defineFree(obj)
+		return free, true
 	}
+	return obj, ok
 }
 
 func (s *SymbolTable) DefineBuiltin(index int, name string) Symbol {
