@@ -41,6 +41,7 @@ func New() *Compiler {
 		previousInstruction: EmittedInstruction{},
 	}
 
+	// XXX: pass the compiler to symbol table??
 	symbolTable := NewSymbolTable()
 
 	for i, v := range object.Builtins {
@@ -123,6 +124,32 @@ func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
 
 	default:
 		return fmt.Errorf("invalid left hand side value in assignment")
+	}
+	return nil
+}
+
+func (c *Compiler) CompileBlockStatement(
+	node *ast.BlockStatement,
+	newFrame bool,
+) error {
+	if !newFrame {
+		// if the block is not introduced by a function, i.e. by if, while, ... etc
+		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
+		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+		c.symbolTable.block = true
+		c.emit(code.OpSaveSp)
+
+		defer func() {
+			c.symbolTable = c.symbolTable.Outer
+			c.emit(code.OpRestoreSp)
+		}()
+	}
+
+	for _, s := range node.Statements {
+		err := c.Compile(s)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -247,7 +274,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		// Emit an `OpJumpNotTruthy` with a bogus value
-		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, -1)
+		jumpNotTruthyPos := c.emit(code.OpJumpNotTruth, -1)
 
 		err = c.Compile(node.Consequence)
 		if err != nil {
@@ -312,7 +339,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpNotTruthy, -1)
+		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
 
 		err = c.Compile(node.Body)
 		if err != nil {
@@ -354,7 +381,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpNotTruthy, -1)
+		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
@@ -363,12 +390,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// before compiling while statement
 
 	case *ast.BlockStatement:
-		for _, s := range node.Statements {
-			err := c.Compile(s)
-			if err != nil {
-				return err
-			}
-		}
+		return c.CompileBlockStatement(node, false)
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
@@ -451,14 +473,18 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.symbolTable.Define(p.Value)
 		}
 
-		err := c.Compile(node.Body)
+		err := c.CompileBlockStatement(node.Body, true)
 		if err != nil {
 			return err
 		}
 
-		if c.lastInstructionIs(code.OpPop) {
-			c.replaceLastPopWithReturn()
-		}
+		// XXX: Chimp force explicit return statement to
+		// return the value which is different with Monkey
+
+		// if c.lastInstructionIs(code.OpPop) {
+		// 	c.replaceLastPopWithReturn()
+		// }
+
 		if !c.lastInstructionIs(code.OpReturnValue) {
 			c.emit(code.OpReturn)
 		}
@@ -502,7 +528,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpCall, len(node.Arguments))
-
 	}
 
 	return nil
@@ -521,6 +546,13 @@ func (c *Compiler) addConstant(obj object.Object) int {
 }
 
 func (c *Compiler) emit(op code.Opcode, operands ...int) int {
+	// desc, _ := code.Lookup(byte(op))
+	// fmt.Printf("%s ", desc.Name)
+	// for _, i := range operands {
+	// 	fmt.Printf("%d ", i)
+	// }
+	// fmt.Printf("\n")
+
 	ins := code.Make(op, operands...)
 	pos := c.addInstruction(ins)
 
@@ -590,9 +622,9 @@ func (c *Compiler) enterScope() {
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
+
 	c.scopes = append(c.scopes, scope)
 	c.scopeIndex++
-
 	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 }
 
@@ -601,7 +633,6 @@ func (c *Compiler) leaveScope() code.Instructions {
 
 	c.scopes = c.scopes[:len(c.scopes)-1]
 	c.scopeIndex--
-
 	c.symbolTable = c.symbolTable.Outer
 
 	return instructions

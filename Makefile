@@ -19,8 +19,8 @@ test:
 	@echo testing object ... && go test object/*
 	@echo testing interpreter ... && go test evaluator/*
 	@echo testing code ... && go test code/*
-	@echo testing compiler ... && go test compiler/*
 	@echo testing vm ... && go test vm/*
+	@echo testing compiler ... && go test compiler/*
 
 benchmark:
 	@echo running benchmark ...

@@ -66,7 +66,7 @@ const (
 	OpGreaterThan
 	OpMinus
 	OpBang
-	OpJumpNotTruthy
+	OpJumpNotTruth
 	OpJump
 	OpNull
 	OpGetGlobal
@@ -87,6 +87,8 @@ const (
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
+	OpSaveSp
+	OpRestoreSp
 )
 
 type Definition struct {
@@ -109,7 +111,7 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterThan:    {"OpGreaterThan", []int{}},
 	OpMinus:          {"OpMinus", []int{}},
 	OpBang:           {"OpBang", []int{}},
-	OpJumpNotTruthy:  {"OpJumpNotTruthy", []int{2}},
+	OpJumpNotTruth:   {"OpJumpNotTruth", []int{2}},
 	OpJump:           {"OpJump", []int{2}},
 	OpNull:           {"OpNull", []int{}},
 	OpGetGlobal:      {"OpGetGlobal", []int{2}},
@@ -130,6 +132,8 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}},
+	OpSaveSp:         {"OpSaveSp", []int{}},
+	OpRestoreSp:      {"OpRestoreSp", []int{}},
 }
 
 func Lookup(op byte) (*Definition, error) {

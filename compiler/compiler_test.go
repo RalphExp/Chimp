@@ -253,16 +253,20 @@ func TestConditionals(t *testing.T) {
 				// 0000
 				code.Make(code.OpTrue),
 				// 0001
-				code.Make(code.OpJumpNotTruthy, 11),
+				code.Make(code.OpJumpNotTruth, 13),
 				// 0004
+				code.Make(code.OpSaveSp),
+				// 0005
 				code.Make(code.OpConstant, 0),
-				// 0007
-				code.Make(code.OpPop),
 				// 0008
-				code.Make(code.OpJump, 11),
-				// 0011
+				code.Make(code.OpPop),
+				// 0009
+				code.Make(code.OpRestoreSp),
+				// 0010
+				code.Make(code.OpJump, 13),
+				// 0013
 				code.Make(code.OpConstant, 1),
-				// 0015
+				// 0016
 				code.Make(code.OpPop),
 			},
 		},
@@ -275,20 +279,28 @@ func TestConditionals(t *testing.T) {
 				// 0000
 				code.Make(code.OpTrue),
 				// 0001
-				code.Make(code.OpJumpNotTruthy, 11),
+				code.Make(code.OpJumpNotTruth, 13),
 				// 0004
+				code.Make(code.OpSaveSp),
+				// 0005
 				code.Make(code.OpConstant, 0),
-				// 0007
-				code.Make(code.OpPop),
 				// 0008
-				code.Make(code.OpJump, 15),
-				// 0011
-				code.Make(code.OpConstant, 1),
-				// 0014
 				code.Make(code.OpPop),
-				// 0015
-				code.Make(code.OpConstant, 2),
+				// 0009
+				code.Make(code.OpRestoreSp),
+				// 0010
+				code.Make(code.OpJump, 19),
+				// 0013
+				code.Make(code.OpSaveSp),
+				// 0014
+				code.Make(code.OpConstant, 1),
+				// 0017
+				code.Make(code.OpPop),
 				// 0018
+				code.Make(code.OpRestoreSp),
+				// 0019
+				code.Make(code.OpConstant, 2),
+				// 0022
 				code.Make(code.OpPop),
 			},
 		},
@@ -366,7 +378,7 @@ func TestFunctions(t *testing.T) {
 			},
 		},
 		{
-			input: `func() { 5 + 10 }`,
+			input: `func() { return 5 + 10 }`,
 			expectedConstants: []interface{}{
 				5,
 				10,
@@ -383,7 +395,7 @@ func TestFunctions(t *testing.T) {
 			},
 		},
 		{
-			input: `func() { 1; 2 }`,
+			input: `func() { 1; return 2 }`,
 			expectedConstants: []interface{}{
 				1,
 				2,
@@ -607,7 +619,7 @@ func TestFunctionsWithoutReturnValue(t *testing.T) {
 func TestFunctionCalls(t *testing.T) {
 	tests := []compilerTestCase{
 		{
-			input: `func() { 24 }();`,
+			input: `func() { return 24 }();`,
 			expectedConstants: []interface{}{
 				24,
 				[]code.Instructions{
@@ -623,7 +635,7 @@ func TestFunctionCalls(t *testing.T) {
 		},
 		{
 			input: `
-			let noArg = func() { 24 };
+			let noArg = func() { return 24 };
 			noArg();
 			`,
 			expectedConstants: []interface{}{
@@ -643,7 +655,7 @@ func TestFunctionCalls(t *testing.T) {
 		},
 		{
 			input: `
-			let oneArg = func(a) { a };
+			let oneArg = func(a) { return a };
 			oneArg(24);
 			`,
 			expectedConstants: []interface{}{
@@ -664,7 +676,7 @@ func TestFunctionCalls(t *testing.T) {
 		},
 		{
 			input: `
-			let manyArg = func(a, b, c) { a; b; c };
+			let manyArg = func(a, b, c) { a; b; return c };
 			manyArg(24, 25, 26);
 			`,
 			expectedConstants: []interface{}{
@@ -701,7 +713,7 @@ func TestLetStatementScopes(t *testing.T) {
 		{
 			input: `
 			let num = 55;
-			func() { num }
+			func() { return num; }
 			`,
 			expectedConstants: []interface{}{
 				55,
@@ -721,7 +733,7 @@ func TestLetStatementScopes(t *testing.T) {
 			input: `
 			func() {
 				let num = 55;
-				num
+				return num;
 			}
 			`,
 			expectedConstants: []interface{}{
@@ -743,7 +755,7 @@ func TestLetStatementScopes(t *testing.T) {
 			func() {
 				let a = 55;
 				let b = 77;
-				a + b
+				return a + b;
 			}
 			`,
 			expectedConstants: []interface{}{
@@ -791,7 +803,7 @@ func TestBuiltins(t *testing.T) {
 			},
 		},
 		{
-			input: `func() { len([]) }`,
+			input: `func() { return len([]) }`,
 			expectedConstants: []interface{}{
 				[]code.Instructions{
 					code.Make(code.OpGetBuiltin, 0),
@@ -815,8 +827,8 @@ func TestClosures(t *testing.T) {
 		{
 			input: `
 			func(a) {
-				func(b) {
-					a + b
+				return func(b) {
+					return a + b
 				}
 			}
 			`,
@@ -841,9 +853,9 @@ func TestClosures(t *testing.T) {
 		{
 			input: `
 			func(a) {
-				func(b) {
-					func(c) {
-						a + b + c
+				return func(b) {
+					return func(c) {
+						return a + b + c
 					}
 				}
 			};
@@ -877,17 +889,13 @@ func TestClosures(t *testing.T) {
 		{
 			input: `
 			let global = 55;
-
 			func() {
 				let a = 66;
-
-				func() {
+				return func() {
 					let b = 77;
-
-					func() {
+					return func() {
 						let c = 88;
-
-						global + a + b + c;
+						return global + a + b + c;
 					}
 				}
 			}
@@ -941,7 +949,7 @@ func TestRecursiveFunctions(t *testing.T) {
 	tests := []compilerTestCase{
 		{
 			input: `
-			let countDown = func(x) { countDown(x - 1); };
+			let countDown = func(x) { return countDown(x-1); };
 			countDown(1);
 			`,
 			expectedConstants: []interface{}{
@@ -968,8 +976,8 @@ func TestRecursiveFunctions(t *testing.T) {
 		{
 			input: `
 			let wrapper = func() {
-				let countDown = func(x) { countDown(x - 1); };
-				countDown(1);
+				let countDown = func(x) { return countDown(x-1); };
+				return countDown(1);
 			};
 			wrapper();
 			`,

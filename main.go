@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"strings"
 )
 
 func main() {
@@ -17,6 +18,25 @@ func main() {
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
 
+	// test case
+	s := `
+	let a = 1;
+	let f1 = func(b) {
+		let f2 = func(c) {
+			let f3 = func(d) {
+				return a + b + c + d
+			};
+			return f3;
+		};
+		return f2;
+	};
+	let x = f1(2);
+	let y = x(3);
+	y(4);
+`
+	in := strings.NewReader(s)
+	_ = in
+
 	if len(os.Args) >= 2 {
 		if os.Args[1] == "-vm" {
 			fmt.Printf("engine [vm]\n")
@@ -24,9 +44,6 @@ func main() {
 			return
 		}
 	}
-
-	// s := `let cd = func(x) { puts(x); if (x == 0) return; else return cd(x-1) };`
-	// in := strings.NewReader(s)
 
 	fmt.Printf("engine [interpreter]\n")
 	interpretor.Start(os.Stdin, os.Stdout)

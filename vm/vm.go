@@ -22,6 +22,7 @@ type VM struct {
 	globals     []object.Object
 	frames      []*Frame
 	framesIndex int
+	savedSp     []int
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -36,6 +37,7 @@ func New(bytecode *compiler.Bytecode) *VM {
 		constants:   bytecode.Constants,
 		stack:       make([]object.Object, StackSize),
 		sp:          0,
+		savedSp:     make([]int, 0),
 		globals:     make([]object.Object, GlobalsSize),
 		frames:      frames,
 		framesIndex: 1,
@@ -81,6 +83,13 @@ func (vm *VM) Run() error {
 		case code.OpPop:
 			vm.pop()
 
+		case code.OpSaveSp:
+			vm.savedSp = append(vm.savedSp, vm.sp)
+
+		case code.OpRestoreSp:
+			vm.sp = vm.savedSp[len(vm.savedSp)-1]
+			vm.savedSp = vm.savedSp[0 : len(vm.savedSp)-1]
+
 		case code.OpAdd,
 			code.OpSub,
 			code.OpMul,
@@ -125,7 +134,7 @@ func (vm *VM) Run() error {
 			pos := int(code.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip = pos - 1
 
-		case code.OpJumpNotTruthy:
+		case code.OpJumpNotTruth:
 			pos := int(code.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip += 2
 

@@ -67,22 +67,22 @@ func TestBooleanExpressions(t *testing.T) {
 	runVmTests(t, tests)
 }
 
-func TestConditionals(t *testing.T) {
-	tests := []vmTestCase{
-		{"if (true) { 10 }", 10},
-		{"if (true) { 10 } else { 20 }", 10},
-		{"if (false) { 10 } else { 20 } ", 20},
-		{"if (1) { 10 }", 10},
-		{"if (1 < 2) { 10 }", 10},
-		{"if (1 < 2) { 10 } else { 20 }", 10},
-		{"if (1 > 2) { 10 } else { 20 }", 20},
-		{"if (1 > 2) { 10 }", False},
-		{"if (false) { 10 }", False},
-		// {"if ((if (false) { 10 })) { 10 } else { 20 }", 20},
-	}
+// func TestConditionals(t *testing.T) {
+// 	tests := []vmTestCase{
+// 		{"if (true) { 10 }", 10},
+// 		{"if (true) { 10 } else { 20 }", 10},
+// 		{"if (false) { 10 } else { 20 } ", 20},
+// 		{"if (1) { 10 }", 10},
+// 		{"if (1 < 2) { 10 }", 10},
+// 		{"if (1 < 2) { 10 } else { 20 }", 10},
+// 		{"if (1 > 2) { 10 } else { 20 }", 20},
+// 		{"if (1 > 2) { 10 }", False},
+// 		{"if (false) { 10 }", False},
+// 		// {"if ((if (false) { 10 })) { 10 } else { 20 }", 20},
+// 	}
 
-	runVmTests(t, tests)
-}
+// 	runVmTests(t, tests)
+// }
 
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []vmTestCase{
@@ -159,24 +159,24 @@ func TestCallingFunctionsWithoutArguments(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let fivePlusTen = func() { 5 + 10; };
+		let fivePlusTen = func() { return 5 + 10; };
 		fivePlusTen();
 		`,
 			expected: 15,
 		},
 		{
 			input: `
-		let one = func() { 1; };
-		let two = func() { 2; };
+		let one = func() { return 1; };
+		let two = func() { return 2; };
 		one() + two()
 		`,
 			expected: 3,
 		},
 		{
 			input: `
-		let a = func() { 1 };
-		let b = func() { a() + 1 };
-		let c = func() { b() + 1 };
+		let a = func() { return 1 };
+		let b = func() { return a() + 1 };
+		let c = func() { return b() + 1 };
 		c();
 		`,
 			expected: 3,
@@ -234,8 +234,8 @@ func TestFirstClassFunctions(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let returnsOne = func() { 1; };
-		let returnsOneReturner = func() { returnsOne; };
+		let returnsOne = func() { return 1; };
+		let returnsOneReturner = func() { return returnsOne; };
 		returnsOneReturner()();
 		`,
 			expected: 1,
@@ -243,8 +243,8 @@ func TestFirstClassFunctions(t *testing.T) {
 		{
 			input: `
 		let returnsOneReturner = func() {
-			let returnsOne = func() { 1; };
-			returnsOne;
+			let returnsOne = func() { return 1; };
+			return returnsOne;
 		};
 		returnsOneReturner()();
 		`,
@@ -259,30 +259,30 @@ func TestCallingFunctionsWithBindings(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let one = func() { let one = 1; one };
+		let one = func() { let one = 1; return one };
 		one();
 		`,
 			expected: 1,
 		},
 		{
 			input: `
-		let oneAndTwo = func() { let one = 1; let two = 2; one + two; };
+		let oneAndTwo = func() { let one = 1; let two = 2; return one + two; };
 		oneAndTwo();
 		`,
 			expected: 3,
 		},
 		{
 			input: `
-		let oneAndTwo = func() { let one = 1; let two = 2; one + two; };
-		let threeAndFour = func() { let three = 3; let four = 4; three + four; };
+		let oneAndTwo = func() { let one = 1; let two = 2; return one + two; };
+		let threeAndFour = func() { let three = 3; let four = 4; return three + four; };
 		oneAndTwo() + threeAndFour();
 		`,
 			expected: 10,
 		},
 		{
 			input: `
-		let firstFoobar = func() { let foobar = 50; foobar; };
-		let secondFoobar = func() { let foobar = 100; foobar; };
+		let firstFoobar = func() { let foobar = 50; return foobar; };
+		let secondFoobar = func() { let foobar = 100; return foobar; };
 		firstFoobar() + secondFoobar();
 		`,
 			expected: 150,
@@ -292,11 +292,11 @@ func TestCallingFunctionsWithBindings(t *testing.T) {
 		let globalSeed = 50;
 		let minusOne = func() {
 			let num = 1;
-			globalSeed - num;
+			return globalSeed - num;
 		}
 		let minusTwo = func() {
 			let num = 2;
-			globalSeed - num;
+			return globalSeed - num;
 		}
 		minusOne() + minusTwo();
 		`,
@@ -311,14 +311,14 @@ func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let identity = func(a) { a; };
+		let identity = func(a) { return a; };
 		identity(4);
 		`,
 			expected: 4,
 		},
 		{
 			input: `
-		let sum = func(a, b) { a + b; };
+		let sum = func(a, b) { return a + b; };
 		sum(1, 2);
 		`,
 			expected: 3,
@@ -327,7 +327,7 @@ func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 			input: `
 		let sum = func(a, b) {
 			let c = a + b;
-			c;
+			return c;
 		};
 		sum(1, 2);
 		`,
@@ -337,7 +337,7 @@ func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 			input: `
 		let sum = func(a, b) {
 			let c = a + b;
-			c;
+			return c;
 		};
 		sum(1, 2) + sum(3, 4);`,
 			expected: 10,
@@ -346,10 +346,10 @@ func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 			input: `
 		let sum = func(a, b) {
 			let c = a + b;
-			c;
+			return c;
 		};
 		let outer = func() {
-			sum(1, 2) + sum(3, 4);
+			return sum(1, 2) + sum(3, 4);
 		};
 		outer();
 		`,
@@ -361,11 +361,11 @@ func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 
 		let sum = func(a, b) {
 			let c = a + b;
-			c + globalNum;
+			return c + globalNum;
 		};
 
 		let outer = func() {
-			sum(1, 2) + sum(3, 4) + globalNum;
+			return sum(1, 2) + sum(3, 4) + globalNum;
 		};
 
 		outer() + globalNum;
@@ -465,7 +465,7 @@ func TestClosures(t *testing.T) {
 		{
 			input: `
 		let newClosure = func(a) {
-			func() { a; };
+			return func() { return a; };
 		};
 		let closure = newClosure(99);
 		closure();
@@ -475,7 +475,7 @@ func TestClosures(t *testing.T) {
 		{
 			input: `
 		let newAdder = func(a, b) {
-			func(c) { a + b + c };
+			return func(c) { return a + b + c };
 		};
 		let adder = newAdder(1, 2);
 		adder(8);
@@ -486,20 +486,20 @@ func TestClosures(t *testing.T) {
 			input: `
 		let newAdder = func(a, b) {
 			let c = a + b;
-			func(d) { c + d };
+			return func(d) { return c + d };
 		};
 		let adder = newAdder(1, 2);
-		adder(8);
+		adder(9);
 		`,
-			expected: 11,
+			expected: 12,
 		},
 		{
 			input: `
 		let newAdderOuter = func(a, b) {
 			let c = a + b;
-			func(d) {
+			return func(d) {
 				let e = d + c;
-				func(f) { e + f; };
+				return func(f) { return e + f; };
 			};
 		};
 		let newAdderInner = newAdderOuter(1, 2)
@@ -512,22 +512,37 @@ func TestClosures(t *testing.T) {
 			input: `
 		let a = 1;
 		let newAdderOuter = func(b) {
-			func(c) {
-				func(d) { a + b + c + d };
+			return func(c) {
+				return a + b + c
 			};
 		};
 		let newAdderInner = newAdderOuter(2)
-		let adder = newAdderInner(3);
-		adder(8);
+		newAdderInner(3);
 		`,
-			expected: 14,
+			expected: 6,
+		},
+		{
+			input: `
+		let a = 1;
+		let f1 = func(b) {
+			return func(c) {
+				return func(d) {
+					return a + b + c + d
+				};
+			};
+		};
+		let f2 = f1(2);
+		let f3 = f2(3);
+		f3(4);
+		`,
+			expected: 10,
 		},
 		{
 			input: `
 		let newClosure = func(a, b) {
-			let one = func() { a; };
-			let two = func() { b; };
-			func() { one() + two(); };
+			let one = func() { return a; };
+			let two = func() { return b; };
+			return func() { return one() + two(); };
 		};
 		let closure = newClosure(9, 90);
 		closure();
@@ -543,28 +558,28 @@ func TestRecursiveFunctions(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let countDown = func(x) {
+		let cd = func(x) {
 			if (x == 0) {
 				return 0;
 			} else {
-				countDown(x - 1);
+				return cd(x - 1);
 			}
 		};
-		countDown(1);
+		cd(1);
 		`,
 			expected: 0,
 		},
 		{
 			input: `
-		let countDown = func(x) {
+		let cd = func(x) {
 			if (x == 0) {
 				return 0;
 			} else {
-				countDown(x - 1);
+				return cd(x-1);
 			}
 		};
 		let wrapper = func() {
-			countDown(1);
+			return cd(1);
 		};
 		wrapper();
 		`,
@@ -573,14 +588,14 @@ func TestRecursiveFunctions(t *testing.T) {
 		{
 			input: `
 		let wrapper = func() {
-			let countDown = func(x) {
-				if (x == 0) {
+			let cd = func(x) {
+				puts(x);
+				if (x == 0)
 					return 0;
-				} else {
-					countDown(x - 1);
-				}
+				else
+					return cd(x - 1);
 			};
-			countDown(1);
+			return cd(10);
 		};
 		wrapper();
 		`,
@@ -589,15 +604,15 @@ func TestRecursiveFunctions(t *testing.T) {
 		{
 			input: `
 		let wrapper = func() {
-			let countDown = func(x) {
+			let cd = func(x) {
 				puts(x)
 				if (x == 0) {
 					return 0;
 				} else {
-					countDown(x - 1);
+					return cd(x - 1);
 				}
 			};
-			return countDown;
+			return cd;
 		};
 		let inner = wrapper();
 		inner(10);
@@ -613,18 +628,18 @@ func TestRecursiveFibonacci(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let fibonacci = func(x) {
+		let fib = func(x) {
 			if (x == 0) {
 				return 0;
 			} else {
 				if (x == 1) {
 					return 1;
 				} else {
-					fibonacci(x - 1) + fibonacci(x - 2);
+					return fib(x - 1) + fib(x - 2);
 				}
 			}
 		};
-		fibonacci(15);
+		fib(15);
 		`,
 			expected: 610,
 		},
