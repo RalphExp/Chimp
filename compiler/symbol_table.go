@@ -84,17 +84,18 @@ func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
 		obj, ok := s.store[name]
 		if ok {
 			if obj.Scope == GlobalScope ||
-				obj.Scope == BuiltinScope ||
-				obj.Scope == FunctionScope {
+				obj.Scope == BuiltinScope {
 				return obj, ok
 			}
-			if !inBlock {
-				free := s.defineFree(obj)
-				return free, true
+
+			if inBlock && obj.Scope == FunctionScope {
+				return obj, ok
 			}
-			// Local Scope
-			return obj, true
+
+			free := s.defineFree(obj)
+			return free, true
 		}
+
 		inBlock = inBlock && s.block
 		s = s.Outer
 		if s == nil {
