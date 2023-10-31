@@ -524,16 +524,16 @@ func TestClosures(t *testing.T) {
 		{
 			input: `
 		let a = 1;
-		let newAdderOuter = func(b) {
+		let f1 = func(b) {
 			return func(c) {
 				return func(d) {
 					return a + b + c + d
 				};
 			};
 		};
-		let newAdderInner = newAdderOuter(2)
-		let adder = newAdderInner(3);
-		adder(4);
+		let f2 = f1(2)
+		let f3 = f2(3);
+		f3(4);
 		`,
 			expected: 10,
 		},

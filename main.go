@@ -19,15 +19,8 @@ func main() {
 	fmt.Printf("Feel free to type in commands\n")
 
 	s := `
-	let cd = func(x) {
-	  puts(x)
-	  if (x == 0) {
-		return 0;
-	  } else {
-		cd(x - 1);
-	  }
-	};
-	cd(10);
+	let newClosure = func(a) { return func() { return a; }; }; let closure = newClosure(99);
+	closure();
 `
 	in := strings.NewReader(s)
 	_ = in
