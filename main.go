@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"strings"
 )
 
 func main() {
@@ -17,18 +18,18 @@ func main() {
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
 
-	// 	s := `
-	// let countDown = func(x) {
-	//   puts(x)
-	//   if (x == 0) {
-	// 	return 0;
-	//   } else {
-	// 	countDown(x - 1);
-	//   }
-	// };
-	// countDown(10)`
-	// 	in := strings.NewReader(s)
-	// 	_ = in
+	s := `
+	let cd = func(x) {
+	  puts(x)
+	  if (x == 0) {
+		return 0;
+	  } else {
+		countDown(x - 1);
+	  }
+	};
+	cd(10)`
+	in := strings.NewReader(s)
+	_ = in
 
 	if len(os.Args) >= 2 {
 		if os.Args[1] == "-vm" {

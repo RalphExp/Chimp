@@ -88,8 +88,12 @@ func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
 				return obj, ok
 			}
 
-			if inBlock && obj.Scope == FunctionScope {
-				return obj, ok
+			// XXX: if the symbol belongs to the same function,
+			// it's not free variable
+			if inBlock {
+				if obj.Scope == FunctionScope || obj.Scope == LocalScope {
+					return obj, ok
+				}
 			}
 
 			free := s.defineFree(obj)
