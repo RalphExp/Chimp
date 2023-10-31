@@ -9,6 +9,10 @@ A javascript like language with VM, extending Monkey
 - support break and continue statements
 - op-assigment +=, -=, .etc
 
+### TODO:
+- block scope handling
+- assignment of array/hash element
+
 ### How to run
 > go run main.go [-vm|-eval]
 
