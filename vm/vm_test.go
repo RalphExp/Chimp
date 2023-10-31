@@ -531,7 +531,7 @@ func TestClosures(t *testing.T) {
 				};
 			};
 		};
-		let f2 = f1(2)
+		let f2 = f1(2);
 		let f3 = f2(3);
 		f3(4);
 		`,

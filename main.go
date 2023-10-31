@@ -19,8 +19,19 @@ func main() {
 	fmt.Printf("Feel free to type in commands\n")
 
 	s := `
-	let newClosure = func(a) { return func() { return a; }; }; let closure = newClosure(99);
-	closure();
+	let a = 1;
+	let f1 = func(b) {
+		let f2 = func(c) {
+			let f3 = func(d) {
+				return a + b + c + d
+			};
+			return f3;
+		};
+		return f2;
+	};
+	let x = f1(2);
+	let y = x(3);
+	y(4);
 `
 	in := strings.NewReader(s)
 	_ = in

@@ -546,6 +546,13 @@ func (c *Compiler) addConstant(obj object.Object) int {
 }
 
 func (c *Compiler) emit(op code.Opcode, operands ...int) int {
+	// desc, _ := code.Lookup(byte(op))
+	// fmt.Printf("%s ", desc.Name)
+	// for _, i := range operands {
+	// 	fmt.Printf("%d ", i)
+	// }
+	// fmt.Printf("\n")
+
 	ins := code.Make(op, operands...)
 	pos := c.addInstruction(ins)
 
