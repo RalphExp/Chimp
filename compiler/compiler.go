@@ -137,11 +137,17 @@ func (c *Compiler) CompileBlockStatement(
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
 		c.symbolTable.block = true
-		c.emit(code.OpSaveSp)
+
+		if !c.symbolTable.Outer.block {
+			c.emit(code.OpSaveSp)
+		}
 
 		defer func() {
 			c.symbolTable = c.symbolTable.Outer
-			c.emit(code.OpRestoreSp)
+			if !c.symbolTable.block {
+				// emit restore only if we reach the first Block in a function
+				c.emit(code.OpRestoreSp)
+			}
 		}()
 	}
 

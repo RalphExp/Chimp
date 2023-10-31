@@ -543,14 +543,14 @@ func TestRecursiveFunctions(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let countDown = func(x) {
+		let cd = func(x) {
 			if (x == 0) {
 				return 0;
 			} else {
-				countDown(x - 1);
+				return cd(x - 1);
 			}
 		};
-		countDown(1);
+		cd(1);
 		`,
 			expected: 0,
 		},
@@ -613,18 +613,18 @@ func TestRecursiveFibonacci(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-		let fibonacci = func(x) {
+		let fib = func(x) {
 			if (x == 0) {
 				return 0;
 			} else {
 				if (x == 1) {
 					return 1;
 				} else {
-					fibonacci(x - 1) + fibonacci(x - 2);
+					fib(x - 1) + fib(x - 2);
 				}
 			}
 		};
-		fibonacci(15);
+		fib(15);
 		`,
 			expected: 610,
 		},

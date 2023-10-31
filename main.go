@@ -24,10 +24,11 @@ func main() {
 	  if (x == 0) {
 		return 0;
 	  } else {
-		countDown(x - 1);
+		cd(x - 1);
 	  }
 	};
-	cd(10)`
+	cd(10);
+`
 	in := strings.NewReader(s)
 	_ = in
 
