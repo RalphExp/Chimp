@@ -117,9 +117,18 @@ func (p *Parser) NextToken() {
 	p.nextToken()
 }
 
+func (p *Parser) skipComment() token.Token {
+	for {
+		tok := p.l.NextToken()
+		if tok.Type != token.COMMENT {
+			return tok
+		}
+	}
+}
+
 func (p *Parser) GetToken() token.Token {
 	if p.curToken.Type == token.NIL {
-		p.curToken = p.l.NextToken()
+		p.curToken = p.skipComment()
 		p.peekToken.Type = token.NIL
 	}
 	return p.curToken
@@ -128,7 +137,7 @@ func (p *Parser) GetToken() token.Token {
 func (p *Parser) PeekToken() token.Token {
 	p.GetToken()
 	if p.peekToken.Type == token.NIL {
-		p.peekToken = p.l.NextToken()
+		p.peekToken = p.skipComment()
 	}
 	return p.peekToken
 }
@@ -137,7 +146,7 @@ func (p *Parser) nextToken() {
 	if p.peekToken.Type != token.NIL {
 		p.curToken = p.peekToken
 	} else {
-		p.curToken = p.l.NextToken()
+		p.curToken = p.skipComment()
 	}
 	p.peekToken.Type = token.NIL
 	p.peekToken.Literal = ""

@@ -55,8 +55,7 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		if l.getChar() == '=' {
 			l.readChar()
-			literal := "=="
-			tok = token.Token{Type: token.EQ, Literal: literal}
+			tok = token.Token{Type: token.EQ, Literal: "=="}
 		} else {
 			tok = newToken(token.ASSIGN, '=')
 		}
@@ -79,32 +78,33 @@ func (l *Lexer) NextToken() token.Token {
 	case '!':
 		if l.getChar() == '=' {
 			l.readChar()
-			literal := "!="
-			tok = token.Token{Type: token.NOT_EQ, Literal: literal}
+			tok = token.Token{Type: token.NOT_EQ, Literal: "!="}
 		} else {
 			tok = newToken(token.BANG, '!')
 		}
 	case '/':
-		if l.getChar() == '=' {
-			l.readChar()
-			literal := "/="
-			tok = token.Token{Type: token.DIV_ASSIGN, Literal: literal}
-		} else {
+		switch l.getChar() {
+		case '=':
+			l.readChar() // advance pointer
+			tok = token.Token{Type: token.DIV_ASSIGN, Literal: "/="}
+		case '/':
+			// discard all the rest content in the buffer
+			l.position = len(l.input)
+			tok = token.Token{Type: token.COMMENT, Literal: "//"}
+		default:
 			tok = newToken(token.DIV, '/')
 		}
 	case '*':
 		if l.getChar() == '=' {
 			l.readChar()
-			literal := "*="
-			tok = token.Token{Type: token.MUL_ASSIGN, Literal: literal}
+			tok = token.Token{Type: token.MUL_ASSIGN, Literal: "*="}
 		} else {
 			tok = newToken(token.MUL, '*')
 		}
 	case '%':
 		if l.getChar() == '=' {
 			l.readChar()
-			literal := "%="
-			tok = token.Token{Type: token.MOD_ASSIGN, Literal: literal}
+			tok = token.Token{Type: token.MOD_ASSIGN, Literal: "%="}
 		} else {
 			tok = newToken(token.MOD, '%')
 		}
@@ -146,19 +146,16 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
-			// fmt.Printf("token: %s\n", tok.Literal)
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Type = token.INT
 			tok.Literal = l.readNumber()
-			// fmt.Printf("token: %s\n", tok.Literal)
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
 
-	// fmt.Printf("token: %s\n", tok.Literal)
 	return tok
 }
 

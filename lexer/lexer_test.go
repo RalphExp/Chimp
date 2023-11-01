@@ -9,7 +9,7 @@ import (
 func TestNextToken(t *testing.T) {
 	input := `let five = 5;
 let ten = 10;
-
+// abc
 let add = func(x, y) {
   x + y;
 };
@@ -50,6 +50,7 @@ let f1;
 		{token.ASSIGN, "="},
 		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
+		{token.COMMENT, "//"},
 		{token.LET, "let"},
 		{token.IDENT, "add"},
 		{token.ASSIGN, "="},

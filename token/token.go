@@ -54,6 +54,7 @@ const (
 	WHILE
 	BREAK
 	CONTINUE
+	COMMENT
 	NULL
 )
 
@@ -119,12 +120,12 @@ var token2name = map[int]string{
 	IF:         "if",
 	ELSE:       "else",
 	RETURN:     "return",
-	// Added in Chimp Parser
-	DO:       "do",
-	FOR:      "for",
-	WHILE:    "while",
-	BREAK:    "break",
-	CONTINUE: "continue",
+	DO:         "do",
+	FOR:        "for",
+	WHILE:      "while",
+	BREAK:      "break",
+	CONTINUE:   "continue",
+	COMMENT:    "comment",
 }
 
 func (t TokenType) Name() string {

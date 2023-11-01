@@ -182,6 +182,7 @@ func TestParsingDoWhileStatements(t *testing.T) {
 	let a = 0;
 	do {
 	  puts(a);
+      // this is a comment line
       a += 2;
 	} while (a < 10);
 `
