@@ -10,7 +10,7 @@ import (
 	"io"
 )
 
-const PROMPT = ">> "
+const PROMPT = "chimp> "
 
 func Start(in io.Reader, out io.Writer) {
 	env := object.NewEnvironment()
@@ -34,7 +34,7 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		if statement == nil {
-			fmt.Fprintf(out, "%s", PROMPT)
+			fmt.Fprintf(out, "\n%s", PROMPT)
 			p.NextToken()
 			continue
 		}

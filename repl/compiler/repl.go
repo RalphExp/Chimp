@@ -11,7 +11,7 @@ import (
 	"io"
 )
 
-const PROMPT = ">> "
+const PROMPT = "chimp> "
 
 func Start(in io.Reader, out io.Writer) {
 	constants := []object.Object{}
@@ -41,7 +41,7 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		if statement == nil {
-			fmt.Fprintf(out, "%s", PROMPT)
+			fmt.Fprintf(out, "\n%s", PROMPT)
 			p.NextToken()
 			continue
 		}
@@ -68,8 +68,6 @@ func Start(in io.Reader, out io.Writer) {
 		lastPopped := machine.LastPoppedStackElem()
 		io.WriteString(out, lastPopped.Inspect())
 		io.WriteString(out, "\n")
-		// io.WriteString(out, fmt.Sprintf("stack size: %d\n", machine.GetStackSize()))
-		// io.WriteString(out, "\n")
 
 		fmt.Fprintf(out, "%s", PROMPT)
 		p.NextToken()
