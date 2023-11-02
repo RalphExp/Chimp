@@ -9,9 +9,9 @@ A javascript like language with VM, extending Monkey, but with more strict synta
 - support do-while statement
 - support break and continue statements
 - op-assigment +=, -=, .etc
+- line comments
 
 ### TODO:
-- comments
 - assignment of array/hash element
 - other features ...
 
