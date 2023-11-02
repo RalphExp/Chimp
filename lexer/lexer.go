@@ -88,9 +88,28 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar() // advance pointer
 			tok = token.Token{Type: token.DIV_ASSIGN, Literal: "/="}
 		case '/':
+			// line comment
 			// discard the rest characters in the buffer
 			l.position = len(l.input)
 			tok = token.Token{Type: token.COMMENT, Literal: "//"}
+		case '*':
+			// block comment handling
+			// eats '*'
+			l.readChar()
+			for {
+				ch := l.readChar()
+				if ch == 0 {
+					break
+				}
+				if ch != '*' {
+					continue
+				}
+				ch = l.readChar()
+				if ch == 0 || ch == '/' {
+					break
+				}
+			}
+			tok = token.Token{Type: token.COMMENT, Literal: "/**/"}
 		default:
 			tok = newToken(token.DIV, '/')
 		}

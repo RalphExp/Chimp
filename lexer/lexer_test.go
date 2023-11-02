@@ -14,8 +14,12 @@ let add = func(x, y) {
   x + y;
 };
 
+/* 
+ * this is a multi-lines block comments
+ */
+
 let result = add(five, ten);
-!-/*5;
+!-/+5;
 5 < 10 > 5;
 
 if (5 < 10) {
@@ -67,6 +71,7 @@ let f1;
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
+		{token.COMMENT, "/**/"},
 		{token.LET, "let"},
 		{token.IDENT, "result"},
 		{token.ASSIGN, "="},
@@ -80,7 +85,7 @@ let f1;
 		{token.BANG, "!"},
 		{token.MINUS, "-"},
 		{token.DIV, "/"},
-		{token.MUL, "*"},
+		{token.PLUS, "+"},
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
 		{token.INT, "5"},
