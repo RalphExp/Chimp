@@ -137,16 +137,18 @@ func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
 func (c *Compiler) CompileBlockStatement(
 	node *ast.BlockStatement,
 	newFrame bool,
+	jmp int,
 ) error {
 	if !newFrame {
 		// if the block is not introduced by a function, i.e. by if, while, ... etc
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
 		c.symbolTable.block = true
+		c.emit(code.OpSaveSp, jmp)
 
 		defer func() {
 			c.symbolTable = c.symbolTable.Outer
-			c.emit(code.OpRestoreSp)
+			c.emit(code.OpRestoreSp, jmp)
 		}()
 	}
 
@@ -352,10 +354,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
-		c.emit(code.OpSaveSp, jmp)
 
 		if body, ok := node.Body.(*ast.BlockStatement); ok {
-			err = c.CompileBlockStatement(body, false)
+			err = c.CompileBlockStatement(body, false, jmp)
 		} else {
 			err = c.Compile(node.Body)
 		}
@@ -364,7 +365,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		c.emit(code.OpRestoreSp, jmp)
 		c.emit(code.OpJump, restart)
 		end = len(c.currentInstructions())
 		c.changeOperand(jmpToEnd, end)
@@ -398,7 +398,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		restart = len(c.currentInstructions())
 
 		if body, ok := node.Body.(*ast.BlockStatement); ok {
-			err = c.CompileBlockStatement(body, false)
+			err = c.CompileBlockStatement(body, false, jmp)
 		} else {
 			err = c.Compile(node.Body)
 		}
@@ -421,8 +421,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
 
-	case *ast.BlockStatement:
-		return c.CompileBlockStatement(node, false)
+	// case *ast.BlockStatement:
+	// 	return c.CompileBlockStatement(node, false)
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
@@ -505,7 +505,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.symbolTable.Define(p.Value)
 		}
 
-		err := c.CompileBlockStatement(node.Body, true)
+		err := c.CompileBlockStatement(node.Body, true, -1 /*unused*/)
 		if err != nil {
 			return err
 		}
