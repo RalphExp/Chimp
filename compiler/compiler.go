@@ -25,13 +25,19 @@ type CompilationScope struct {
 	previousInstruction EmittedInstruction
 }
 
+type JmpContext struct {
+	jmp int   // stack pointer
+	ips []int // instruction pointer
+}
+
 type Compiler struct {
 	constants       []object.Object
 	symbolTable     *SymbolTable
 	scopes          []CompilationScope
-	breakContext    [][]int
-	continueContext [][]int
+	breakContext    []JmpContext
+	continueContext []JmpContext
 	scopeIndex      int
+	jmpIndex        int // for break/continue see CompileWhileStatement
 }
 
 func New() *Compiler {
@@ -53,13 +59,13 @@ func New() *Compiler {
 		symbolTable:     symbolTable,
 		scopes:          []CompilationScope{mainScope},
 		scopeIndex:      0,
-		breakContext:    make([][]int, 0),
-		continueContext: make([][]int, 0),
+		breakContext:    make([]JmpContext, 0),
+		continueContext: make([]JmpContext, 0),
 	}
 }
 
-func (c *Compiler) pushBreakContext() {
-	c.breakContext = append(c.breakContext, []int{})
+func (c *Compiler) pushBreakContext(jmp int) {
+	c.breakContext = append(c.breakContext, JmpContext{jmp: jmp})
 }
 
 func (c *Compiler) popBreakContext() {
@@ -67,8 +73,8 @@ func (c *Compiler) popBreakContext() {
 	c.breakContext = c.breakContext[0 : l-1]
 }
 
-func (c *Compiler) pushContinueContext() {
-	c.continueContext = append(c.continueContext, []int{})
+func (c *Compiler) pushContinueContext(jmp int) {
+	c.continueContext = append(c.continueContext, JmpContext{jmp: jmp})
 }
 
 func (c *Compiler) popContinueContext() {
@@ -137,7 +143,6 @@ func (c *Compiler) CompileBlockStatement(
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
 		c.symbolTable.block = true
-		c.emit(code.OpSaveSp)
 
 		defer func() {
 			c.symbolTable = c.symbolTable.Outer
@@ -255,17 +260,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if len(c.breakContext) == 0 {
 			return fmt.Errorf("no break context found")
 		}
-		pos := c.emit(code.OpJump, -1)
 		l := len(c.breakContext) - 1
-		c.breakContext[l] = append(c.breakContext[l], pos)
+		c.emit(code.OpRestoreSp, c.breakContext[l].jmp)
+
+		pos := c.emit(code.OpJump, -1)
+		c.breakContext[l].ips = append(c.breakContext[l].ips, pos)
 
 	case *ast.ContinueStatement:
 		if len(c.continueContext) == 0 {
 			return fmt.Errorf("no continue context found")
 		}
-		pos := c.emit(code.OpJump, -1)
+
 		l := len(c.continueContext) - 1
-		c.continueContext[l] = append(c.continueContext[l], pos)
+		c.emit(code.OpRestoreSp, c.continueContext[l].jmp)
+		pos := c.emit(code.OpJump, -1)
+		c.continueContext[l].ips = append(c.continueContext[l].ips, pos)
 
 	case *ast.IfStatement:
 		err := c.Compile(node.Condition)
@@ -283,7 +292,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		// don't need this since if is statement
 		// if c.lastInstructionIs(code.OpPop) {
-		// 	c.removeLastPop()
+		//    c.removeLastPop()
 		// }
 
 		// Emit an `OpJump` with a bogus value
@@ -303,7 +312,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 			// don't need this
 			// if c.lastInstructionIs(code.OpPop) {
-			// 	c.removeLastPop()
+			// 	  c.removeLastPop()
 			// }
 		}
 
@@ -315,19 +324,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// c.emit(code.OpPop)
 
 	case *ast.WhileStatement:
+		var jmp int = c.jmpIndex
 		var restart int
 		var end int
 
-		c.pushBreakContext()
-		c.pushContinueContext()
+		c.pushBreakContext(c.jmpIndex)
+		c.pushContinueContext(c.jmpIndex)
+		c.jmpIndex++
+
 		defer func() {
 			// backfill
 			l := len(c.breakContext)
-			for _, pos := range c.breakContext[l-1] {
-				c.changeOperand(pos, end)
+			for _, ip := range c.breakContext[l-1].ips {
+				c.changeOperand(ip, end)
 			}
-			for _, pos := range c.continueContext[l-1] {
-				c.changeOperand(pos, restart)
+			for _, ip := range c.continueContext[l-1].ips {
+				c.changeOperand(ip, restart)
 			}
 			c.popBreakContext()
 			c.popContinueContext()
@@ -340,12 +352,19 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
+		c.emit(code.OpSaveSp, jmp)
 
-		err = c.Compile(node.Body)
+		if body, ok := node.Body.(*ast.BlockStatement); ok {
+			err = c.CompileBlockStatement(body, false)
+		} else {
+			err = c.Compile(node.Body)
+		}
+
 		if err != nil {
 			return err
 		}
 
+		c.emit(code.OpRestoreSp, jmp)
 		c.emit(code.OpJump, restart)
 		end = len(c.currentInstructions())
 		c.changeOperand(jmpToEnd, end)
@@ -354,16 +373,23 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// before compiling while statement
 
 	case *ast.DoWhileStatement:
+		var jmp int = c.jmpIndex
 		var restart int
 		var end int
+		var err error
+
+		c.pushBreakContext(c.jmpIndex)
+		c.pushContinueContext(c.jmpIndex)
+		c.jmpIndex++
+
 		defer func() {
 			// backfill
 			l := len(c.breakContext)
-			for _, pos := range c.breakContext[l-1] {
-				c.changeOperand(pos, end)
+			for _, ip := range c.breakContext[l-1].ips {
+				c.changeOperand(ip, end)
 			}
-			for _, pos := range c.continueContext[l-1] {
-				c.changeOperand(pos, restart)
+			for _, ip := range c.continueContext[l-1].ips {
+				c.changeOperand(ip, restart)
 			}
 			c.popBreakContext()
 			c.popContinueContext()
@@ -371,7 +397,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		restart = len(c.currentInstructions())
 
-		err := c.Compile(node.Body)
+		if body, ok := node.Body.(*ast.BlockStatement); ok {
+			err = c.CompileBlockStatement(body, false)
+		} else {
+			err = c.Compile(node.Body)
+		}
+
 		if err != nil {
 			return err
 		}
@@ -382,6 +413,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
+		c.emit(code.OpRestoreSp, jmp)
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())

@@ -132,8 +132,8 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}},
-	OpSaveSp:         {"OpSaveSp", []int{}},
-	OpRestoreSp:      {"OpRestoreSp", []int{}},
+	OpSaveSp:         {"OpSaveSp", []int{2}},
+	OpRestoreSp:      {"OpRestoreSp", []int{2}},
 }
 
 func Lookup(op byte) (*Definition, error) {
