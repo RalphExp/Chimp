@@ -326,13 +326,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// c.emit(code.OpPop)
 
 	case *ast.WhileStatement:
-		var jmp int = c.jmpIndex
 		var restart int
 		var end int
-
-		c.pushBreakContext(c.jmpIndex)
-		c.pushContinueContext(c.jmpIndex)
-		c.jmpIndex++
 
 		defer func() {
 			// backfill
@@ -355,11 +350,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
 
-		if body, ok := node.Body.(*ast.BlockStatement); ok {
-			err = c.CompileBlockStatement(body, false, jmp)
-		} else {
-			err = c.Compile(node.Body)
-		}
+		err = c.Compile(node.Body)
 
 		if err != nil {
 			return err
@@ -373,14 +364,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// before compiling while statement
 
 	case *ast.DoWhileStatement:
-		var jmp int = c.jmpIndex
 		var restart int
 		var end int
 		var err error
-
-		c.pushBreakContext(c.jmpIndex)
-		c.pushContinueContext(c.jmpIndex)
-		c.jmpIndex++
 
 		defer func() {
 			// backfill
@@ -396,12 +382,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}()
 
 		restart = len(c.currentInstructions())
-
-		if body, ok := node.Body.(*ast.BlockStatement); ok {
-			err = c.CompileBlockStatement(body, false, jmp)
-		} else {
-			err = c.Compile(node.Body)
-		}
+		err = c.Compile(node.Body)
 
 		if err != nil {
 			return err
@@ -413,7 +394,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
-		c.emit(code.OpRestoreSp, jmp)
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
@@ -421,8 +401,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
 
-	// case *ast.BlockStatement:
-	// 	return c.CompileBlockStatement(node, false)
+	case *ast.BlockStatement:
+		c.pushBreakContext(c.jmpIndex)
+		c.pushContinueContext(c.jmpIndex)
+		c.jmpIndex++
+		return c.CompileBlockStatement(node, false, c.jmpIndex-1)
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
