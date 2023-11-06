@@ -137,9 +137,11 @@ func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
 func (c *Compiler) CompileBlockStatement(
 	node *ast.BlockStatement,
 	newFrame bool,
-	jmp int,
 ) error {
+	var jmp int = c.jmpIndex
 	if !newFrame {
+		c.jmpIndex++
+
 		// if the block is not introduced by a function, i.e. by if, while, ... etc
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
@@ -266,6 +268,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpRestoreSp, c.breakContext[l].jmp)
 
 		pos := c.emit(code.OpJump, -1)
+		// later the pos will change duration backfill
 		c.breakContext[l].ips = append(c.breakContext[l].ips, pos)
 
 	case *ast.ContinueStatement:
@@ -276,6 +279,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		l := len(c.continueContext) - 1
 		c.emit(code.OpRestoreSp, c.continueContext[l].jmp)
 		pos := c.emit(code.OpJump, -1)
+
+		// later the pos will change duration backfill
 		c.continueContext[l].ips = append(c.continueContext[l].ips, pos)
 
 	case *ast.IfStatement:
@@ -328,6 +333,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.WhileStatement:
 		var restart int
 		var end int
+		c.pushBreakContext(c.jmpIndex)
+		c.pushContinueContext(c.jmpIndex)
+		c.jmpIndex++
 
 		defer func() {
 			// backfill
@@ -368,6 +376,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		var end int
 		var err error
 
+		c.pushBreakContext(c.jmpIndex)
+		c.pushContinueContext(c.jmpIndex)
+		c.jmpIndex++
+
 		defer func() {
 			// backfill
 			l := len(c.breakContext)
@@ -402,10 +414,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// before compiling while statement
 
 	case *ast.BlockStatement:
-		c.pushBreakContext(c.jmpIndex)
-		c.pushContinueContext(c.jmpIndex)
-		c.jmpIndex++
-		return c.CompileBlockStatement(node, false, c.jmpIndex-1)
+		return c.CompileBlockStatement(node, false)
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
@@ -488,7 +497,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.symbolTable.Define(p.Value)
 		}
 
-		err := c.CompileBlockStatement(node.Body, true, -1 /*unused*/)
+		err := c.CompileBlockStatement(node.Body, true)
 		if err != nil {
 			return err
 		}
