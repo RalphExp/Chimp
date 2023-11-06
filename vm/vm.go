@@ -90,7 +90,7 @@ func (vm *VM) Run() error {
 		case code.OpRestoreSp:
 			saveIndex := code.ReadUint16(ins[ip+1:])
 			vm.sp = vm.savedSp[int(saveIndex)]
-			delete(vm.savedSp, int(saveIndex))
+			// delete(vm.savedSp, int(saveIndex))
 
 		case code.OpAdd,
 			code.OpSub,
