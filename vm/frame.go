@@ -17,7 +17,7 @@ func NewFrame(cl *object.Closure, basePointer int) *Frame {
 		cl:          cl,          // closure object
 		ip:          -1,          // instruction pointer
 		basePointer: basePointer, // base pointer points to callee(the current function) + 1
-		blocks:      []int{},
+		blocks:      []int{basePointer},
 	}
 
 	return f

@@ -27,8 +27,8 @@ type CompilationScope struct {
 }
 
 type JmpContext struct {
-	blk int   // blockIndex of the current scope
-	ips []int // instruction pointer
+	blkIndex int   // blockIndex of the current scope
+	ips      []int // instruction pointer
 }
 
 type Compiler struct {
@@ -67,7 +67,7 @@ func New() *Compiler {
 
 func (c *Compiler) pushBreakContext() {
 	c.breakContext = append(c.breakContext, JmpContext{
-		blk: c.currentScope().blkIndex,
+		blkIndex: c.currentScope().blkIndex,
 	})
 }
 
@@ -78,7 +78,7 @@ func (c *Compiler) popBreakContext() {
 
 func (c *Compiler) pushContinueContext() {
 	c.continueContext = append(c.continueContext, JmpContext{
-		blk: c.currentScope().blkIndex,
+		blkIndex: c.currentScope().blkIndex,
 	})
 }
 
@@ -269,7 +269,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("no break context found")
 		}
 		l := len(c.breakContext) - 1
-		c.emit(code.OpLeave, c.breakContext[l].blk)
+		c.emit(code.OpLeave, c.breakContext[l].blkIndex)
 
 		pos := c.emit(code.OpJump, -1)
 		// later the pos will change duration backfill
@@ -281,7 +281,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		l := len(c.continueContext) - 1
-		c.emit(code.OpLeave, c.breakContext[l].blk)
+		c.emit(code.OpLeave, c.breakContext[l].blkIndex)
 		pos := c.emit(code.OpJump, -1)
 
 		// later the pos will change duration backfill

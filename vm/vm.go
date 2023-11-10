@@ -88,8 +88,12 @@ func (vm *VM) Run() error {
 			f.blocks = append(f.blocks, vm.sp)
 
 		case code.OpLeave:
-			blk := code.ReadUint16(ins[ip+1:])
 			f := vm.currentFrame()
+			blk := int(code.ReadUint16(ins[ip+1:]))
+			if blk == 0 {
+				blk = len(f.blocks) - 2
+			}
+
 			vm.sp = f.blocks[blk]
 			f.blocks = f.blocks[:blk+1]
 
