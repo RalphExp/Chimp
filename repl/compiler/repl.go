@@ -66,6 +66,7 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		lastPopped := machine.LastPoppedStackElem()
+		io.WriteString(out, fmt.Sprintf("stack size: %d\n", machine.GetStackSize()))
 		io.WriteString(out, lastPopped.Inspect())
 		io.WriteString(out, "\n")
 
