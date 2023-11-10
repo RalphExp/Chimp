@@ -94,6 +94,7 @@ func (vm *VM) Run() error {
 				blk = len(f.blocks) - 2
 			}
 
+			vm.currentFrame().ip += 2
 			vm.sp = f.blocks[blk]
 			f.blocks = f.blocks[:blk+1]
 

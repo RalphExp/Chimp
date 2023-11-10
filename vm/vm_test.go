@@ -84,6 +84,15 @@ func TestBooleanExpressions(t *testing.T) {
 // 	runVmTests(t, tests)
 // }
 
+func TestWhile(t *testing.T) {
+	tests := []vmTestCase{
+		{"while (1) { let a = 1; break; }", 1},
+		{"let a = 2; while (1) { let a = 1; break; } a; ", 2},
+		{"let a = 3; while (1) { let a = 1; while (1) { let a = 2; break; } break; } a; ", 3},
+	}
+	runVmTests(t, tests)
+}
+
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []vmTestCase{
 		{"let one = 1; one", 1},
