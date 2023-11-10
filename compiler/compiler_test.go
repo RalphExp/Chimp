@@ -253,20 +253,20 @@ func TestConditionals(t *testing.T) {
 				// 0000
 				code.Make(code.OpTrue),
 				// 0001
-				code.Make(code.OpJumpNotTruth, 17),
+				code.Make(code.OpJumpIfFalse, 15),
 				// 0004
-				code.Make(code.OpSaveSp, 0),
-				// 0007
+				code.Make(code.OpEnter),
+				// 0005
 				code.Make(code.OpConstant, 0),
-				// 0010
+				// 0008
 				code.Make(code.OpPop),
-				// 0011
-				code.Make(code.OpRestoreSp),
-				// 0014
-				code.Make(code.OpJump, 17),
-				// 0017
+				// 0009
+				code.Make(code.OpLeave, 0),
+				// 0012
+				code.Make(code.OpJump, 15),
+				// 0015
 				code.Make(code.OpConstant, 1),
-				// 0020
+				// 0018
 				code.Make(code.OpPop),
 			},
 		},
@@ -279,28 +279,28 @@ func TestConditionals(t *testing.T) {
 				// 0000
 				code.Make(code.OpTrue),
 				// 0001
-				code.Make(code.OpJumpNotTruth, 17),
+				code.Make(code.OpJumpIfFalse, 15),
 				// 0004
-				code.Make(code.OpSaveSp, 0),
-				// 0007
+				code.Make(code.OpEnter),
+				// 0005
 				code.Make(code.OpConstant, 0),
-				// 0010
+				// 0008
 				code.Make(code.OpPop),
-				// 0011
-				code.Make(code.OpRestoreSp, 0),
-				// 0014
-				code.Make(code.OpJump, 27),
-				// 0017
-				code.Make(code.OpSaveSp, 1),
-				// 0020
+				// 0009
+				code.Make(code.OpLeave, 0),
+				// 0012
+				code.Make(code.OpJump, 23),
+				// 0015
+				code.Make(code.OpEnter),
+				// 0016
 				code.Make(code.OpConstant, 1),
-				// 0023
+				// 0019
 				code.Make(code.OpPop),
-				// 0024
-				code.Make(code.OpRestoreSp, 1),
-				// 0027
+				// 0020
+				code.Make(code.OpLeave, 0),
+				// 0023
 				code.Make(code.OpConstant, 2),
-				// 0030
+				// 0026
 				code.Make(code.OpPop),
 			},
 		},

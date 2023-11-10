@@ -294,7 +294,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		// Emit an `OpJumpNotTruthy` with a bogus value
-		jumpNotTruthyPos := c.emit(code.OpJumpNotTruth, -1)
+		jumpNotTruthyPos := c.emit(code.OpJumpIfFalse, -1)
 
 		err = c.Compile(node.Consequence)
 		if err != nil {
@@ -359,7 +359,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
+		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
 
 		err = c.Compile(node.Body)
 
@@ -407,7 +407,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
+		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
