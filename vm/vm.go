@@ -22,7 +22,6 @@ type VM struct {
 	globals     []object.Object
 	frames      []*Frame
 	framesIndex int
-	savedSp     map[int]int
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -37,7 +36,6 @@ func New(bytecode *compiler.Bytecode) *VM {
 		constants:   bytecode.Constants,
 		stack:       make([]object.Object, StackSize),
 		sp:          0,
-		savedSp:     make(map[int]int),
 		globals:     make([]object.Object, GlobalsSize),
 		frames:      frames,
 		framesIndex: 1,
@@ -82,21 +80,6 @@ func (vm *VM) Run() error {
 
 		case code.OpPop:
 			vm.pop()
-
-		case code.OpEnter:
-			f := vm.currentFrame()
-			f.blocks = append(f.blocks, vm.sp)
-
-		case code.OpLeave:
-			f := vm.currentFrame()
-			blk := int(code.ReadUint16(ins[ip+1:]))
-			if blk == 65535 /* leave the current block */ {
-				blk = len(f.blocks) - 2
-			}
-
-			vm.currentFrame().ip += 2
-			vm.sp = f.blocks[blk]
-			f.blocks = f.blocks[:blk+1]
 
 		case code.OpAdd,
 			code.OpSub,

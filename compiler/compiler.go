@@ -23,12 +23,10 @@ type CompilationScope struct {
 	instructions        code.Instructions
 	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
-	blkIndex            int
 }
 
 type JmpContext struct {
-	blkIndex int   // blockIndex of the current scope
-	ips      []int // instruction pointer
+	ips []int // instruction pointer
 }
 
 type Compiler struct {
@@ -45,7 +43,6 @@ func New() *Compiler {
 		instructions:        code.Instructions{},
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
-		blkIndex:            0,
 	}
 
 	// XXX: pass the compiler to symbol table??
@@ -66,9 +63,7 @@ func New() *Compiler {
 }
 
 func (c *Compiler) pushBreakContext() {
-	c.breakContext = append(c.breakContext, JmpContext{
-		blkIndex: c.currentScope().blkIndex,
-	})
+	c.breakContext = append(c.breakContext, JmpContext{})
 }
 
 func (c *Compiler) popBreakContext() {
@@ -77,9 +72,7 @@ func (c *Compiler) popBreakContext() {
 }
 
 func (c *Compiler) pushContinueContext() {
-	c.continueContext = append(c.continueContext, JmpContext{
-		blkIndex: c.currentScope().blkIndex,
-	})
+	c.continueContext = append(c.continueContext, JmpContext{})
 }
 
 func (c *Compiler) popContinueContext() {
@@ -148,13 +141,9 @@ func (c *Compiler) CompileBlockStatement(
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
 		c.symbolTable.block = true
-		c.currentScope().blkIndex++
-		c.emit(code.OpEnter)
 
 		defer func() {
-			c.currentScope().blkIndex--
 			c.symbolTable = c.symbolTable.Outer
-			c.emit(code.OpLeave, -1) // back to the last block
 		}()
 	}
 
@@ -269,7 +258,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("no break context found")
 		}
 		l := len(c.breakContext) - 1
-		c.emit(code.OpLeave, c.breakContext[l].blkIndex)
 
 		pos := c.emit(code.OpJump, -1)
 		// later the pos will change duration backfill
@@ -281,7 +269,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		l := len(c.continueContext) - 1
-		c.emit(code.OpLeave, c.breakContext[l].blkIndex)
 		pos := c.emit(code.OpJump, -1)
 
 		// later the pos will change duration backfill
