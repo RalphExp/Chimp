@@ -83,14 +83,15 @@ func (vm *VM) Run() error {
 		case code.OpPop:
 			vm.pop()
 
-		case code.OpSaveSp:
-			saveIndex := code.ReadUint16(ins[ip+1:])
-			vm.savedSp[int(saveIndex)] = vm.sp
+		case code.OpEnter:
+			f := vm.currentFrame()
+			f.blocks = append(f.blocks, vm.sp)
 
-		case code.OpRestoreSp:
-			saveIndex := code.ReadUint16(ins[ip+1:])
-			vm.sp = vm.savedSp[int(saveIndex)]
-			// delete(vm.savedSp, int(saveIndex))
+		case code.OpLeave:
+			blk := code.ReadUint16(ins[ip+1:])
+			f := vm.currentFrame()
+			vm.sp = f.blocks[blk]
+			f.blocks = f.blocks[:blk+1]
 
 		case code.OpAdd,
 			code.OpSub,
