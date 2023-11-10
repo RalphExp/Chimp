@@ -154,7 +154,7 @@ func (c *Compiler) CompileBlockStatement(
 		defer func() {
 			c.currentScope().blkIndex--
 			c.symbolTable = c.symbolTable.Outer
-			c.emit(code.OpLeave, 0) // back to the last block
+			c.emit(code.OpLeave, -1) // back to the last block
 		}()
 	}
 
