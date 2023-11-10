@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"chimp/ast"
 	"chimp/compiler"
 	"chimp/lexer"
 	"chimp/object"
@@ -67,7 +68,12 @@ func Start(in io.Reader, out io.Writer) {
 
 		lastPopped := machine.LastPoppedStackElem()
 		io.WriteString(out, fmt.Sprintf("stack size: %d\n", machine.GetStackSize()))
-		io.WriteString(out, lastPopped.Inspect())
+
+		if _, ok := statement.(*ast.ExpressionStatement); ok {
+			io.WriteString(out, lastPopped.Inspect())
+		} else {
+			io.WriteString(out, "nil")
+		}
 		io.WriteString(out, "\n")
 
 		fmt.Fprintf(out, "%s", PROMPT)
