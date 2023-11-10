@@ -261,7 +261,7 @@ func TestConditionals(t *testing.T) {
 				// 0008
 				code.Make(code.OpPop),
 				// 0009
-				code.Make(code.OpLeave, 0),
+				code.Make(code.OpLeave, 65535),
 				// 0012
 				code.Make(code.OpJump, 15),
 				// 0015
@@ -287,7 +287,7 @@ func TestConditionals(t *testing.T) {
 				// 0008
 				code.Make(code.OpPop),
 				// 0009
-				code.Make(code.OpLeave, 0),
+				code.Make(code.OpLeave, 65535),
 				// 0012
 				code.Make(code.OpJump, 23),
 				// 0015
@@ -297,7 +297,7 @@ func TestConditionals(t *testing.T) {
 				// 0019
 				code.Make(code.OpPop),
 				// 0020
-				code.Make(code.OpLeave, 0),
+				code.Make(code.OpLeave, 65535),
 				// 0023
 				code.Make(code.OpConstant, 2),
 				// 0026
