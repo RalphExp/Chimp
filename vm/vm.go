@@ -90,7 +90,7 @@ func (vm *VM) Run() error {
 		case code.OpLeave:
 			f := vm.currentFrame()
 			blk := int(code.ReadUint16(ins[ip+1:]))
-			if blk == -1 {
+			if blk == 65535 /* leave the current block */ {
 				blk = len(f.blocks) - 2
 			}
 
