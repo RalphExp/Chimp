@@ -447,7 +447,58 @@ func (p *Parser) parseContinueStatement() *ast.ContinueStatement {
 }
 
 func (p *Parser) parseForStatement() *ast.ForStatement {
-	return nil
+
+	statement := &ast.ForStatement{Token: p.GetToken()}
+	/*
+		if !p.expectPeek(token.LPAREN) {
+			return nil
+		}
+
+		// expectPeek eats 'for' and nextToken eats '('
+		p.nextToken()
+		if p.GetToken().Type == token.SEMICOLON {
+			statement.Init = nil
+			p.nextToken()
+		} else {
+			if p.GetToken().Type == token.LET {
+				statement.Init = p.parseLetStatement()
+			} else {
+				statement.Init = p.parseExpressionStatement()
+			}
+			if !p.expectPeek(token.SEMICOLON) {
+				return nil
+			}
+		}
+
+		if p.GetToken().Type == token.SEMICOLON {
+			statement.Condition = nil
+			p.nextToken()
+		} else {
+			statement.Condition = p.parseExpression(LOWEST)
+			if !p.expectPeek(token.SEMICOLON) {
+				return nil
+			}
+		}
+
+		if p.GetToken().Type == token.RBRACE {
+			statement.Increment = nil
+			p.nextToken()
+		} else {
+			statement.Increment = p.parseExpression(LOWEST)
+			if !p.expectPeek(token.RBRACE) {
+				return nil
+			}
+		}
+
+		if p.peekTokenIs(token.LBRACE) {
+			p.nextToken()
+			statement.Body = p.parseBlockStatement()
+		} else {
+			p.nextToken()
+			statement.Body = p.parseStatement()
+		}
+	*/
+	return statement
 }
 
 func (p *Parser) parseWhileStatement() *ast.WhileStatement {

@@ -23,22 +23,29 @@ type CompilationScope struct {
 	instructions        code.Instructions
 	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
+	blkIndex            int
+}
+
+type JmpContext struct {
+	blkIndex int   // blockIndex of the current scope
+	ips      []int // instruction pointer
 }
 
 type Compiler struct {
 	constants       []object.Object
 	symbolTable     *SymbolTable
-	scopes          []CompilationScope
-	breakContext    [][]int
-	continueContext [][]int
+	scopes          []*CompilationScope
+	breakContext    []JmpContext
+	continueContext []JmpContext
 	scopeIndex      int
 }
 
 func New() *Compiler {
-	mainScope := CompilationScope{
+	mainScope := &CompilationScope{
 		instructions:        code.Instructions{},
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
+		blkIndex:            0,
 	}
 
 	// XXX: pass the compiler to symbol table??
@@ -51,15 +58,17 @@ func New() *Compiler {
 	return &Compiler{
 		constants:       []object.Object{},
 		symbolTable:     symbolTable,
-		scopes:          []CompilationScope{mainScope},
+		scopes:          []*CompilationScope{mainScope},
 		scopeIndex:      0,
-		breakContext:    make([][]int, 0),
-		continueContext: make([][]int, 0),
+		breakContext:    make([]JmpContext, 0),
+		continueContext: make([]JmpContext, 0),
 	}
 }
 
 func (c *Compiler) pushBreakContext() {
-	c.breakContext = append(c.breakContext, []int{})
+	c.breakContext = append(c.breakContext, JmpContext{
+		blkIndex: c.currentScope().blkIndex,
+	})
 }
 
 func (c *Compiler) popBreakContext() {
@@ -68,7 +77,9 @@ func (c *Compiler) popBreakContext() {
 }
 
 func (c *Compiler) pushContinueContext() {
-	c.continueContext = append(c.continueContext, []int{})
+	c.continueContext = append(c.continueContext, JmpContext{
+		blkIndex: c.currentScope().blkIndex,
+	})
 }
 
 func (c *Compiler) popContinueContext() {
@@ -137,11 +148,13 @@ func (c *Compiler) CompileBlockStatement(
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
 		c.symbolTable.block = true
-		c.emit(code.OpSaveSp)
+		c.currentScope().blkIndex++
+		c.emit(code.OpEnter)
 
 		defer func() {
+			c.currentScope().blkIndex--
 			c.symbolTable = c.symbolTable.Outer
-			c.emit(code.OpRestoreSp)
+			c.emit(code.OpLeave, -1) // back to the last block
 		}()
 	}
 
@@ -255,17 +268,24 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if len(c.breakContext) == 0 {
 			return fmt.Errorf("no break context found")
 		}
-		pos := c.emit(code.OpJump, -1)
 		l := len(c.breakContext) - 1
-		c.breakContext[l] = append(c.breakContext[l], pos)
+		c.emit(code.OpLeave, c.breakContext[l].blkIndex)
+
+		pos := c.emit(code.OpJump, -1)
+		// later the pos will change duration backfill
+		c.breakContext[l].ips = append(c.breakContext[l].ips, pos)
 
 	case *ast.ContinueStatement:
 		if len(c.continueContext) == 0 {
 			return fmt.Errorf("no continue context found")
 		}
-		pos := c.emit(code.OpJump, -1)
+
 		l := len(c.continueContext) - 1
-		c.continueContext[l] = append(c.continueContext[l], pos)
+		c.emit(code.OpLeave, c.breakContext[l].blkIndex)
+		pos := c.emit(code.OpJump, -1)
+
+		// later the pos will change duration backfill
+		c.continueContext[l].ips = append(c.continueContext[l].ips, pos)
 
 	case *ast.IfStatement:
 		err := c.Compile(node.Condition)
@@ -274,7 +294,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		// Emit an `OpJumpNotTruthy` with a bogus value
-		jumpNotTruthyPos := c.emit(code.OpJumpNotTruth, -1)
+		jumpNotTruthyPos := c.emit(code.OpJumpIfFalse, -1)
 
 		err = c.Compile(node.Consequence)
 		if err != nil {
@@ -283,7 +303,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		// don't need this since if is statement
 		// if c.lastInstructionIs(code.OpPop) {
-		// 	c.removeLastPop()
+		//    c.removeLastPop()
 		// }
 
 		// Emit an `OpJump` with a bogus value
@@ -303,7 +323,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 			// don't need this
 			// if c.lastInstructionIs(code.OpPop) {
-			// 	c.removeLastPop()
+			// 	  c.removeLastPop()
 			// }
 		}
 
@@ -317,17 +337,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.WhileStatement:
 		var restart int
 		var end int
-
 		c.pushBreakContext()
 		c.pushContinueContext()
+
 		defer func() {
 			// backfill
 			l := len(c.breakContext)
-			for _, pos := range c.breakContext[l-1] {
-				c.changeOperand(pos, end)
+			for _, ip := range c.breakContext[l-1].ips {
+				c.changeOperand(ip, end)
 			}
-			for _, pos := range c.continueContext[l-1] {
-				c.changeOperand(pos, restart)
+			for _, ip := range c.continueContext[l-1].ips {
+				c.changeOperand(ip, restart)
 			}
 			c.popBreakContext()
 			c.popContinueContext()
@@ -339,9 +359,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
+		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
 
 		err = c.Compile(node.Body)
+
 		if err != nil {
 			return err
 		}
@@ -356,22 +377,27 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.DoWhileStatement:
 		var restart int
 		var end int
+		var err error
+
+		c.pushBreakContext()
+		c.pushContinueContext()
+
 		defer func() {
 			// backfill
 			l := len(c.breakContext)
-			for _, pos := range c.breakContext[l-1] {
-				c.changeOperand(pos, end)
+			for _, ip := range c.breakContext[l-1].ips {
+				c.changeOperand(ip, end)
 			}
-			for _, pos := range c.continueContext[l-1] {
-				c.changeOperand(pos, restart)
+			for _, ip := range c.continueContext[l-1].ips {
+				c.changeOperand(ip, restart)
 			}
 			c.popBreakContext()
 			c.popContinueContext()
 		}()
 
 		restart = len(c.currentInstructions())
+		err = c.Compile(node.Body)
 
-		err := c.Compile(node.Body)
 		if err != nil {
 			return err
 		}
@@ -381,7 +407,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpNotTruth, -1)
+		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
@@ -617,7 +643,7 @@ func (c *Compiler) currentInstructions() code.Instructions {
 }
 
 func (c *Compiler) enterScope() {
-	scope := CompilationScope{
+	scope := &CompilationScope{
 		instructions:        code.Instructions{},
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
@@ -636,6 +662,10 @@ func (c *Compiler) leaveScope() code.Instructions {
 	c.symbolTable = c.symbolTable.Outer
 
 	return instructions
+}
+
+func (c *Compiler) currentScope() *CompilationScope {
+	return c.scopes[len(c.scopes)-1]
 }
 
 func (c *Compiler) replaceLastPopWithReturn() {

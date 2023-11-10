@@ -229,10 +229,10 @@ func (ie *IfStatement) String() string {
 
 type ForStatement struct {
 	Token     token.Token
-	Init      Statement
+	Init      Statement // only LetStatment or ExpressionStatement is allowed
 	Condition Expression
 	Increment Expression
-	Statement Statement
+	Body      Statement
 }
 
 func (fs *ForStatement) statementNode()       {}
@@ -244,7 +244,7 @@ func (fs *ForStatement) String() string {
 	out.WriteString(fs.Init.String())
 	out.WriteString(fs.Condition.String())
 	out.WriteString(fs.Increment.String())
-	out.WriteString(fs.Statement.String())
+	out.WriteString(fs.Body.String())
 	return out.String()
 }
 

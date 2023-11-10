@@ -66,7 +66,7 @@ const (
 	OpGreaterThan
 	OpMinus
 	OpBang
-	OpJumpNotTruth
+	OpJumpIfFalse
 	OpJump
 	OpNull
 	OpGetGlobal
@@ -87,8 +87,8 @@ const (
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
-	OpSaveSp
-	OpRestoreSp
+	OpEnter // enter block
+	OpLeave // leave block
 )
 
 type Definition struct {
@@ -111,7 +111,7 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterThan:    {"OpGreaterThan", []int{}},
 	OpMinus:          {"OpMinus", []int{}},
 	OpBang:           {"OpBang", []int{}},
-	OpJumpNotTruth:   {"OpJumpNotTruth", []int{2}},
+	OpJumpIfFalse:    {"OpJumpIfFalse", []int{2}},
 	OpJump:           {"OpJump", []int{2}},
 	OpNull:           {"OpNull", []int{}},
 	OpGetGlobal:      {"OpGetGlobal", []int{2}},
@@ -132,8 +132,8 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}},
-	OpSaveSp:         {"OpSaveSp", []int{}},
-	OpRestoreSp:      {"OpRestoreSp", []int{}},
+	OpEnter:          {"OpEnter", []int{}},
+	OpLeave:          {"OpLeave", []int{2}},
 }
 
 func Lookup(op byte) (*Definition, error) {
