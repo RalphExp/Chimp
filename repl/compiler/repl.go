@@ -38,7 +38,9 @@ func Start(in io.Reader, out io.Writer) {
 		statement := p.ParseStatement()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
-			break
+			p.Clear()
+			fmt.Fprintf(out, "%s", PROMPT)
+			continue
 		}
 
 		if statement == nil {
@@ -53,8 +55,7 @@ func Start(in io.Reader, out io.Writer) {
 			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
 			// if compile failed, we should remove all the contents
 			// left in the previous buffer
-			l = lexer.New(in)
-			p = parser.New(l)
+			p.Clear()
 			fmt.Fprintf(out, "%s", PROMPT)
 			continue
 		}

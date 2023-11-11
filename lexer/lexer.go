@@ -45,6 +45,11 @@ func NewFile(input string) *Lexer {
 	return nil
 }
 
+func (l *Lexer) Clear() {
+	l.input = ""
+	l.position = 0
+}
+
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 

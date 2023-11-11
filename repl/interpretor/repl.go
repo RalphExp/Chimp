@@ -30,7 +30,9 @@ func Start(in io.Reader, out io.Writer) {
 		statement := p.ParseStatement()
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
-			break
+			p.Clear()
+			fmt.Fprintf(out, "%s", PROMPT)
+			continue
 		}
 
 		if statement == nil {
