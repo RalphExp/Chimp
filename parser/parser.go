@@ -179,8 +179,24 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 	}
 }
 
+func (p *Parser) expectCurrent(t token.TokenType) bool {
+	if p.curTokenIs(t) {
+		p.nextToken()
+		return true
+	} else {
+		p.curError(t)
+		return false
+	}
+}
+
 func (p *Parser) Errors() []string {
 	return p.errors
+}
+
+func (p *Parser) curError(t token.TokenType) {
+	msg := fmt.Sprintf("expected current token to be '%s', got '%s' instead",
+		t.Name(), p.curToken.Type.Name())
+	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) peekError(t token.TokenType) {
@@ -465,43 +481,39 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 	p.nextToken()
 	if p.GetToken().Type == token.SEMICOLON {
 		statement.Init = nil
-		p.nextToken()
 	} else {
 		if p.GetToken().Type == token.LET {
 			statement.Init = p.parseLetStatement()
 		} else {
 			statement.Init = p.parseExpressionStatement()
 		}
-		if !p.expectPeek(token.SEMICOLON) {
-			return nil
-		}
+	}
+
+	// eats ';'
+	if !p.expectCurrent(token.SEMICOLON) {
+		return nil
 	}
 
 	if p.GetToken().Type == token.SEMICOLON {
 		statement.Condition = nil
-		p.nextToken()
 	} else {
 		statement.Condition = p.parseExpression(LOWEST)
-		if !p.expectPeek(token.SEMICOLON) {
-			return nil
-		}
+		p.expectPeek(token.SEMICOLON)
 	}
 
-	if p.GetToken().Type == token.RBRACE {
+	// eats ';'
+	p.nextToken()
+	if p.GetToken().Type == token.RPAREN {
 		statement.Increment = nil
-		p.nextToken()
 	} else {
 		statement.Increment = p.parseExpression(LOWEST)
-		if !p.expectPeek(token.RBRACE) {
-			return nil
-		}
+		p.expectPeek(token.RPAREN)
 	}
 
-	if p.peekTokenIs(token.LBRACE) {
-		p.nextToken()
+	p.nextToken() // eats ')'
+	if p.GetToken().Type == token.LBRACE {
 		statement.Body = p.parseBlockStatement()
 	} else {
-		p.nextToken()
 		statement.Body = p.parseStatement()
 	}
 
@@ -517,18 +529,16 @@ func (p *Parser) parseWhileStatement() *ast.WhileStatement {
 
 	// expectPeek eats 'while' and nextToken eats '('
 	p.nextToken()
-
 	statement.Condition = p.parseExpression(LOWEST)
 
 	if !p.expectPeek(token.RPAREN) {
 		return nil
 	}
 
-	if p.peekTokenIs(token.LBRACE) {
-		p.nextToken()
+	p.nextToken()
+	if p.GetToken().Type == token.LBRACE {
 		statement.Body = p.parseBlockStatement()
 	} else {
-		p.nextToken()
 		statement.Body = p.parseStatement()
 	}
 

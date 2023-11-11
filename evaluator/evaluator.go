@@ -381,23 +381,24 @@ func evalWhileStatement(ws *ast.WhileStatement,
 		if isError(condition) {
 			return condition
 		}
-		if isTruthy(condition) {
-			obj := Eval(ws.Body, env)
-			if isError(obj) {
-				return obj
-			}
 
-			if obj == nil {
-				continue
-			} else if obj.Type() == object.BREAK_OBJ {
-				break
-			} else if obj.Type() == object.CONTINUE_OBJ {
-				continue
-			} else if obj.Type() == object.RETURN_VALUE_OBJ {
-				return obj
-			}
-		} else {
+		if !isTruthy(condition) {
 			break
+		}
+
+		obj := Eval(ws.Body, env)
+		if isError(obj) {
+			return obj
+		}
+
+		if obj == nil {
+			continue
+		} else if obj.Type() == object.BREAK_OBJ {
+			break
+		} else if obj.Type() == object.CONTINUE_OBJ {
+			continue
+		} else if obj.Type() == object.RETURN_VALUE_OBJ {
+			return obj
 		}
 	}
 	return NULL
@@ -449,8 +450,48 @@ func evalForStatement(
 	env *object.Environment,
 ) object.Object {
 
-	fmt.Printf("%s\n", f.String())
-	return nil
+	env.PushBreakContext()
+	env.PushContinueContext()
+
+	defer func() {
+		env.PopBreakContext()
+		env.PopContinueContext()
+	}()
+
+	init := Eval(f.Init, env)
+	if isError(init) {
+		return init
+	}
+
+	for {
+		condition := Eval(f.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+
+		if !isTruthy(condition) {
+			break
+		}
+
+		obj := Eval(f.Body, env)
+		if isError(obj) {
+			return obj
+		}
+
+		if obj.Type() == object.BREAK_OBJ {
+			break
+		} else if obj.Type() == object.CONTINUE_OBJ {
+			continue
+		} else if obj.Type() == object.RETURN_VALUE_OBJ {
+			return obj
+		}
+
+		incr := Eval(f.Increment, env)
+		if isError(incr) {
+			return incr
+		}
+	}
+	return NULL
 }
 
 func evalIdentifier(
@@ -469,23 +510,21 @@ func evalIdentifier(
 }
 
 func isTruthy(obj object.Object) bool {
-	switch obj {
-	case NULL:
-		return false
-	case TRUE:
-		return true
-	case FALSE:
-		return false
-	default:
-		switch obj.Type() {
-		case object.INTEGER_OBJ:
-			i := obj.(*object.Integer).Value
-			return i != 0
+	switch obj := obj.(type) {
 
-		case object.STRING_OBJ:
-			i := len(obj.(*object.String).Value)
-			return i > 0
-		}
+	case *object.Boolean:
+		return obj.Value
+
+	case *object.Null:
+		return false
+
+	case *object.Integer:
+		return obj.Value != 0
+
+	case *object.String:
+		return len(obj.Value) > 0
+
+	default:
 		return true
 	}
 }

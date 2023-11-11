@@ -19,7 +19,7 @@ func main() {
 	fmt.Printf("Feel free to type in commands\n")
 
 	// test case
-	s := `
+	s := `for (a = 0; a < 10; a+=1) {}
 `
 	in := strings.NewReader(s)
 	_ = in
