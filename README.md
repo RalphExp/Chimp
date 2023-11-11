@@ -12,13 +12,14 @@ A javascript like language with VM, extending Monkey, but with more strict synta
 - change if expression to if statement
 - support while statement
 - support do-while statement
+- support for statement
 - support break and continue statements
 - op-assigment +=, -=, .etc
+- byte code for the new statements
 - line comments and block comment
 
 ### TODO:
-- assignment of array/hash element
-- other features ...
+- see the code
 
 ### How to run
 > go run main.go [-vm|-eval]
