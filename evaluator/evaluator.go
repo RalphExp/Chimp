@@ -458,22 +458,25 @@ func evalForStatement(
 		env.PopContinueContext()
 	}()
 
-	init := Eval(f.Init, env)
+	// for statment declares variable(s) in its own env
+	forEnv := object.NewEnclosedEnvironment(env)
+	init := Eval(f.Init, forEnv)
 	if isError(init) {
 		return init
 	}
 
 	for {
-		condition := Eval(f.Condition, env)
-		if isError(condition) {
-			return condition
+		if f.Condition != nil {
+			condition := Eval(f.Condition, forEnv)
+			if isError(condition) {
+				return condition
+			}
+			if !isTruthy(condition) {
+				break
+			}
 		}
 
-		if !isTruthy(condition) {
-			break
-		}
-
-		obj := Eval(f.Body, env)
+		obj := Eval(f.Body, forEnv)
 		if isError(obj) {
 			return obj
 		}
@@ -486,7 +489,7 @@ func evalForStatement(
 			return obj
 		}
 
-		incr := Eval(f.Increment, env)
+		incr := Eval(f.Increment, forEnv)
 		if isError(incr) {
 			return incr
 		}
