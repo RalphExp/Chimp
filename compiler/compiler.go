@@ -139,7 +139,15 @@ func (c *Compiler) CompileBlockStatement(
 	if !newFrame {
 		// if the block is not introduced by a function, i.e. by if, while, ... etc
 		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
-		c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+
+		if c.symbolTable.Outer.Outer == nil {
+			// e.g. when the program is
+			// let a = 1; if (1) { let a = 1; }
+			// we want the COMMANDS to be SETLOCAL 0 rather than SETCLOCAL 1
+			c.symbolTable.numDefinitions = 0
+		} else {
+			c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+		}
 		c.symbolTable.block = true
 
 		defer func() {

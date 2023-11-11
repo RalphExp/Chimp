@@ -20,19 +20,7 @@ func main() {
 
 	// test case
 	s := `
-	let a = 1;
-	let f1 = func(b) {
-		let f2 = func(c) {
-			let f3 = func(d) {
-				return a + b + c + d
-			};
-			return f3;
-		};
-		return f2;
-	};
-	let x = f1(2);
-	let y = x(3);
-	y(4);
+	let a = 1; if (1) { let b = 2; };
 `
 	in := strings.NewReader(s)
 	_ = in
