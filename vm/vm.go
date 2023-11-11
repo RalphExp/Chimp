@@ -140,12 +140,6 @@ func (vm *VM) Run() error {
 				return err
 			}
 
-		case code.OpSetGlobalNoPop:
-			globalIndex := code.ReadUint16(ins[ip+1:])
-			vm.currentFrame().ip += 2
-
-			vm.globals[globalIndex] = vm.top()
-
 		case code.OpSetGlobal:
 			globalIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
@@ -226,7 +220,7 @@ func (vm *VM) Run() error {
 				return err
 			}
 
-		case code.OpSetLocal, code.OpSetLocalNoPop:
+		case code.OpSetLocal:
 			localIndex := code.ReadUint8(ins[ip+1:])
 			vm.currentFrame().ip += 1
 
@@ -234,13 +228,6 @@ func (vm *VM) Run() error {
 			vm.stack[frame.basePointer+int(localIndex)] = vm.pop()
 			if vm.sp == frame.basePointer+int(localIndex) {
 				vm.sp++
-			}
-
-			if op == code.OpSetGlobalNoPop {
-				err := vm.push(vm.stack[frame.basePointer+int(localIndex)])
-				if err != nil {
-					return err
-				}
 			}
 
 		case code.OpGetLocal:

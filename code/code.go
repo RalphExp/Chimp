@@ -71,7 +71,8 @@ const (
 	OpNull
 	OpGetGlobal
 	OpSetGlobal
-	OpSetGlobalNoPop
+	OpGetLocal
+	OpSetLocal
 	OpArray
 	OpHash
 	OpIndex
@@ -80,15 +81,10 @@ const (
 	OpCall
 	OpReturnValue
 	OpReturn
-	OpGetLocal
-	OpSetLocal
-	OpSetLocalNoPop
 	OpGetBuiltin
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
-	OpEnter // enter block
-	OpLeave // leave block
 )
 
 type Definition struct {
@@ -116,7 +112,6 @@ var definitions = map[Opcode]*Definition{
 	OpNull:           {"OpNull", []int{}},
 	OpGetGlobal:      {"OpGetGlobal", []int{2}},
 	OpSetGlobal:      {"OpSetGlobal", []int{2}},
-	OpSetGlobalNoPop: {"OpSetGlobalNoPop", []int{2}},
 	OpArray:          {"OpArray", []int{2}},
 	OpIndex:          {"OpIndex", []int{}},
 	OpSetIndex:       {"OpSetIndex", []int{}}, // TODO
@@ -127,7 +122,6 @@ var definitions = map[Opcode]*Definition{
 	OpReturn:         {"OpReturn", []int{}},
 	OpGetLocal:       {"OpGetLocal", []int{1}},
 	OpSetLocal:       {"OpSetLocal", []int{1}},
-	OpSetLocalNoPop:  {"OpSetLocalNoPop", []int{1}},
 	OpGetBuiltin:     {"OpGetBuiltin", []int{1}},
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},

@@ -97,6 +97,8 @@ func TestWhile(t *testing.T) {
 func TestBlockScope(t *testing.T) {
 	tests := []vmTestCase{
 		{"if (1) { let a = 1; if (1) { let b = 2; } let c = 3; a + c}", 4},
+		{"let a = 1; if (1) { let a = 1; if (1) { let b = 2; } let c = 3; a + c}", 4},
+		{"let a = 1; if (1) { let b = 2; a += b; }", 3},
 	}
 	runVmTests(t, tests)
 }

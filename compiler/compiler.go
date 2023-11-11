@@ -121,9 +121,11 @@ func (c *Compiler) CompileAssignment(node *ast.InfixExpression) error {
 		}
 
 		if symbol.Scope == GlobalScope {
-			c.emit(code.OpSetGlobalNoPop, symbol.Index)
+			c.emit(code.OpSetGlobal, symbol.Index)
+			c.emit(code.OpGetGlobal, symbol.Index)
 		} else {
-			c.emit(code.OpSetLocalNoPop, symbol.Index)
+			c.emit(code.OpSetLocal, symbol.Index)
+			c.emit(code.OpGetLocal, symbol.Index)
 		}
 
 	default:
