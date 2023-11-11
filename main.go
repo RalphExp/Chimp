@@ -20,7 +20,6 @@ func main() {
 
 	// test case
 	s := `
-	let a = 1; if (1) { let b = 2; };
 `
 	in := strings.NewReader(s)
 	_ = in

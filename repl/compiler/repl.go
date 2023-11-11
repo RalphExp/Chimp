@@ -51,6 +51,11 @@ func Start(in io.Reader, out io.Writer) {
 		err := comp.Compile(statement)
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
+			// if compile failed, we should remove all the contents
+			// left in the previous buffer
+			l = lexer.New(in)
+			p = parser.New(l)
+			fmt.Fprintf(out, "%s", PROMPT)
 			continue
 		}
 
@@ -63,6 +68,7 @@ func Start(in io.Reader, out io.Writer) {
 		err = machine.Run()
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
+			fmt.Fprintf(out, "%s", PROMPT)
 			continue
 		}
 
