@@ -524,6 +524,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			NumParameters: len(node.Parameters),
 		}
 
+		fmt.Printf("%s\n", instructions.String())
+
 		fnIndex := c.addConstant(compiledFn)
 		c.emit(code.OpClosure, fnIndex, len(freeSymbols))
 
