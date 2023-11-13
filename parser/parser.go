@@ -286,14 +286,8 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	// if fl, ok := stmt.Value.(*ast.FunctionLiteral); ok {
-	// 	fl.Name = stmt.Name.Value
-	// }
-
 	if fl, ok := stmt.Value.(*ast.FunctionLiteral); ok {
-		if fl.Name == "" {
-			fl.Name = stmt.Name.Value
-		}
+		fl.Name = stmt.Name.Value
 	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
@@ -637,7 +631,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	lit := &ast.FunctionLiteral{Token: p.GetToken()}
 
 	if p.peekTokenIs(token.IDENT) {
-		lit.Name = p.PeekToken().Literal
+		lit.Alias = p.PeekToken().Literal
 		p.nextToken()
 	}
 

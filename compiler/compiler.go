@@ -298,11 +298,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		// don't need this since if is statement
-		// if c.lastInstructionIs(code.OpPop) {
-		//    c.removeLastPop()
-		// }
-
 		// Emit an `OpJump` with a bogus value
 		jumpPos := c.emit(code.OpJump, -1)
 
@@ -317,11 +312,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			if err != nil {
 				return err
 			}
-
-			// don't need this
-			// if c.lastInstructionIs(code.OpPop) {
-			// 	  c.removeLastPop()
-			// }
 		}
 
 		afterAlternativePos := len(c.currentInstructions())
@@ -492,6 +482,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.symbolTable.DefineFunctionName(node.Name)
 		}
 
+		if node.Alias != "" {
+			c.symbolTable.DefineFunctionName(node.Alias)
+		}
+
 		for _, p := range node.Parameters {
 			c.symbolTable.Define(p.Value)
 		}
@@ -503,10 +497,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		// XXX: Chimp force explicit return statement to
 		// return the value which is different with Monkey
-
-		// if c.lastInstructionIs(code.OpPop) {
-		// 	c.replaceLastPopWithReturn()
-		// }
 
 		if !c.lastInstructionIs(code.OpReturnValue) {
 			c.emit(code.OpReturn)
@@ -530,6 +520,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		fnIndex := c.addConstant(compiledFn)
 		c.emit(code.OpClosure, fnIndex, len(freeSymbols))
+
+		if node.Alias != "" {
+			symbol := c.symbolTable.Define(node.Alias)
+			if symbol.Scope == GlobalScope {
+				c.emit(code.OpSetGlobal, symbol.Index)
+				c.emit(code.OpGetGlobal, symbol.Index)
+			} else {
+				c.emit(code.OpSetLocal, symbol.Index)
+				c.emit(code.OpGetLocal, symbol.Index)
+			}
+		}
 
 	case *ast.ReturnStatement:
 		err := c.Compile(node.ReturnValue)
