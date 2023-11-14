@@ -20,7 +20,7 @@ let add = func(x, y) {
 
 let result = add(five, ten);
 !-/+5;
-5 < 10 > 5;
+5 <= 10 >= 5;
 
 if (5 < 10) {
 	return true;
@@ -30,6 +30,7 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+10 > 9;
 "foobar"
 "foo bar"
 [1, 2];
@@ -89,9 +90,9 @@ let f1;
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
 		{token.INT, "5"},
-		{token.LT, "<"},
+		{token.LE, "<="},
 		{token.INT, "10"},
-		{token.GT, ">"},
+		{token.GE, ">="},
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
 		{token.IF, "if"},
@@ -117,6 +118,10 @@ let f1;
 		{token.SEMICOLON, ";"},
 		{token.INT, "10"},
 		{token.NOT_EQ, "!="},
+		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.GT, ">"},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
 		{token.STRING, "foobar"},

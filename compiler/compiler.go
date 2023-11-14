@@ -188,20 +188,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return c.CompileAssignment(node)
 		}
 
-		if node.Operator == "<" {
-			err := c.Compile(node.Right)
-			if err != nil {
-				return err
-			}
-
-			err = c.Compile(node.Left)
-			if err != nil {
-				return err
-			}
-			c.emit(code.OpGreaterThan)
-			return nil
-		}
-
 		err := c.Compile(node.Left)
 		if err != nil {
 			return err
@@ -223,8 +209,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpDiv)
 		case "%":
 			c.emit(code.OpMod)
+		case "<":
+			c.emit(code.OpLess)
+		case "<=":
+			c.emit(code.OpLessEqual)
 		case ">":
-			c.emit(code.OpGreaterThan)
+			c.emit(code.OpGreater)
+		case ">=":
+			c.emit(code.OpGreaterEqual)
 		case "==":
 			c.emit(code.OpEqual)
 		case "!=":
@@ -407,6 +399,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 	case *ast.LetStatement:
 		symbol := c.symbolTable.Define(node.Name.Value)
+
 		if node.Value != nil {
 			err := c.Compile(node.Value)
 			if err != nil {

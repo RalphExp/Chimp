@@ -133,9 +133,19 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.MOD, '%')
 		}
 	case '<':
-		tok = newToken(token.LT, l.ch)
+		if l.getChar() == '=' {
+			l.readChar()
+			tok = token.Token{Type: token.LE, Literal: "<="}
+		} else {
+			tok = newToken(token.LT, '<')
+		}
 	case '>':
-		tok = newToken(token.GT, l.ch)
+		if l.getChar() == '=' {
+			l.readChar()
+			tok = token.Token{Type: token.GE, Literal: ">="}
+		} else {
+			tok = newToken(token.GT, '>')
+		}
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case ':':

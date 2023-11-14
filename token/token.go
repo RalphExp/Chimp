@@ -27,7 +27,9 @@ const (
 	DIV    // "/"
 	MOD    // "%"
 	LT     // "<"
+	LE     // "<="
 	GT     // ">"
+	GE     // ">="
 	EQ     // "=="
 	NOT_EQ // "!="
 	// Delimiters
@@ -101,7 +103,9 @@ var token2name = map[int]string{
 	DIV:        "/",
 	MOD:        "%",
 	LT:         "<",
+	LE:         "<=",
 	GT:         ">",
+	GE:         ">=",
 	EQ:         "==",
 	NOT_EQ:     "!=",
 	COMMA:      ",",

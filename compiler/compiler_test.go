@@ -174,17 +174,37 @@ func TestBooleanExpressions(t *testing.T) {
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpGreaterThan),
+				code.Make(code.OpGreater),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input:             "1 >= 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpGreaterEqual),
 				code.Make(code.OpPop),
 			},
 		},
 		{
 			input:             "1 < 2",
-			expectedConstants: []interface{}{2, 1},
+			expectedConstants: []interface{}{1, 2},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpGreaterThan),
+				code.Make(code.OpLess),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input:             "1 <= 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpLessEqual),
 				code.Make(code.OpPop),
 			},
 		},

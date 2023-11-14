@@ -13,7 +13,7 @@ const (
 	LOWEST
 	ASSIGN      // =|+=|-=|*=|/=|%=
 	EQUALS      // ==
-	LESSGREATER // > or <
+	LESSGREATER // <, <=, >, >=
 	SUM         // +
 	PRODUCT     // *
 	PREFIX      // -X or !X
@@ -22,23 +22,25 @@ const (
 )
 
 var precedences = map[token.TokenType]int{
-	token.ASSIGN:     ASSIGN,
-	token.ADD_ASSIGN: ASSIGN,
-	token.SUB_ASSIGN: ASSIGN,
-	token.MUL_ASSIGN: ASSIGN,
-	token.DIV_ASSIGN: ASSIGN,
-	token.MOD_ASSIGN: ASSIGN,
-	token.EQ:         EQUALS,      // == 2
-	token.NOT_EQ:     EQUALS,      // != 2
-	token.LT:         LESSGREATER, // <  3
-	token.GT:         LESSGREATER, // >  3
-	token.PLUS:       SUM,         // +  4
-	token.MINUS:      SUM,         // -  4
-	token.MUL:        PRODUCT,     // /  5
-	token.DIV:        PRODUCT,     // *  5
-	token.MOD:        PRODUCT,     // %  5
-	token.LPAREN:     CALL,        // () 7
-	token.LBRACKET:   INDEX,       // [] 8
+	token.ASSIGN:     ASSIGN,      // = 20
+	token.ADD_ASSIGN: ASSIGN,      // = 20
+	token.SUB_ASSIGN: ASSIGN,      // = 20
+	token.MUL_ASSIGN: ASSIGN,      // = 20
+	token.DIV_ASSIGN: ASSIGN,      // = 20
+	token.MOD_ASSIGN: ASSIGN,      // = 20
+	token.EQ:         EQUALS,      // == 30
+	token.NOT_EQ:     EQUALS,      // != 30
+	token.LT:         LESSGREATER, // <  40
+	token.LE:         LESSGREATER, // <= 40
+	token.GT:         LESSGREATER, // >  40
+	token.GE:         LESSGREATER, // >= 40
+	token.PLUS:       SUM,         // +  50
+	token.MINUS:      SUM,         // -  50
+	token.MUL:        PRODUCT,     // /  60
+	token.DIV:        PRODUCT,     // *  60
+	token.MOD:        PRODUCT,     // %  60
+	token.LPAREN:     CALL,        // () 70
+	token.LBRACKET:   INDEX,       // [] 80
 }
 
 var assignmentOp = map[string]bool{
@@ -106,7 +108,9 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.LE, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.GE, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
