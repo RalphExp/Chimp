@@ -22,16 +22,20 @@ const (
 	DEC
 	PLUS
 	MINUS
-	BANG   // !
-	MUL    // "*"
-	DIV    // "/"
-	MOD    // "%"
-	LT     // "<"
-	LE     // "<="
-	GT     // ">"
-	GE     // ">="
-	EQ     // "=="
-	NOT_EQ // "!="
+	BANG    // !
+	MUL     // "*"
+	DIV     // "/"
+	MOD     // "%"
+	LT      // "<"
+	LE      // "<="
+	GT      // ">"
+	GE      // ">="
+	EQ      // "=="
+	NOT_EQ  // "!="
+	AND     // "&&"
+	OR      // "||"
+	BIT_AND // "&"
+	BIT_OR  // "|"
 	// Delimiters
 	COMMA     // ","
 	SEMICOLON // ";"
@@ -108,6 +112,10 @@ var token2name = map[int]string{
 	GE:         ">=",
 	EQ:         "==",
 	NOT_EQ:     "!=",
+	AND:        "&&",
+	OR:         "||",
+	BIT_AND:    "&",
+	BIT_OR:     "|",
 	COMMA:      ",",
 	SEMICOLON:  ";",
 	COLON:      ":",

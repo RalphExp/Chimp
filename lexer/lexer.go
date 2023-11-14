@@ -146,6 +146,20 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = newToken(token.GT, '>')
 		}
+	case '&':
+		if l.getChar() == '&' {
+			l.readChar()
+			tok = token.Token{Type: token.AND, Literal: "&&"}
+		} else {
+			tok = newToken(token.BIT_AND, '&')
+		}
+	case '|':
+		if l.getChar() == '|' {
+			l.readChar()
+			tok = token.Token{Type: token.OR, Literal: "||"}
+		} else {
+			tok = newToken(token.BIT_OR, '|')
+		}
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case ':':
