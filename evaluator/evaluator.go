@@ -245,12 +245,10 @@ func evalInfixExpression(
 
 func evalAndExpression(left, right object.Object) object.Object {
 	b := isTruthy(left)
-	if b {
-		if isTruthy(right) {
-			return right
-		}
+	if !b {
+		return left
 	}
-	return FALSE
+	return right
 }
 
 func evalOrExpression(left, right object.Object) object.Object {
@@ -258,10 +256,7 @@ func evalOrExpression(left, right object.Object) object.Object {
 	if b {
 		return left
 	}
-	if isTruthy(right) {
-		return right
-	}
-	return FALSE
+	return right
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
