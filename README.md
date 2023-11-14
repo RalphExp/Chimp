@@ -15,6 +15,7 @@ A javascript like language with VM, extending Monkey, but with more strict synta
 - support for statement
 - support break and continue statements
 - op-assigment +=, -=, .etc
+- short circuit and/or
 - byte code for the new statements
 - line comments and block comment
 
