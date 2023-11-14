@@ -230,6 +230,10 @@ func evalInfixExpression(
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
+	case operator == "&&":
+		panic("not implemented")
+	case operator == "||":
+		panic("not implemented")
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s",
 			left.Type(), operator, right.Type())
