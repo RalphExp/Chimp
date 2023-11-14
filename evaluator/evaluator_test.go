@@ -59,6 +59,10 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"(1 < 2) == false", false},
 		{"(1 > 2) == true", false},
 		{"(1 > 2) == false", true},
+		{"(1 >= 2) == false", true},
+		{"(1 >= 2) == true", false},
+		{"(1 <= 2) == false", false},
+		{"(1 <= 2) == true", true},
 	}
 
 	for _, tt := range tests {
@@ -249,8 +253,8 @@ func TestLetStatements(t *testing.T) {
 		{"let a = 5 * 5; a;", 25},
 		{"let a = 5; let b = a; b;", 5},
 		{"let a = 5; let b = a; let c = a + b + 5; c;", 15},
-        {"let a = 0; a += a -= 2", -2},
-        {"let a = 10; a += a -= a *= a /= a %= 3", -80},
+		{"let a = 0; a += a -= 2", -2},
+		{"let a = 10; a += a -= a *= a /= a %= 3", -80},
 	}
 
 	for _, tt := range tests {
