@@ -222,6 +222,10 @@ func evalInfixExpression(
 	left, right object.Object,
 ) object.Object {
 	switch {
+	case operator == "&&":
+		return evalAndExpression(left, right)
+	case operator == "||":
+		return evalOrExpression(left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
@@ -230,10 +234,6 @@ func evalInfixExpression(
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
-	case operator == "&&":
-		panic("not implemented")
-	case operator == "||":
-		panic("not implemented")
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s",
 			left.Type(), operator, right.Type())
@@ -241,6 +241,27 @@ func evalInfixExpression(
 		return newError("unknown operator: %s %s %s",
 			left.Type(), operator, right.Type())
 	}
+}
+
+func evalAndExpression(left, right object.Object) object.Object {
+	b := isTruthy(left)
+	if b {
+		if isTruthy(right) {
+			return right
+		}
+	}
+	return FALSE
+}
+
+func evalOrExpression(left, right object.Object) object.Object {
+	b := isTruthy(left)
+	if b {
+		return left
+	}
+	if isTruthy(right) {
+		return right
+	}
+	return FALSE
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
