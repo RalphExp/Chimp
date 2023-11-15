@@ -415,6 +415,19 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.popContinueContext()
 		}()
 
+		// add a new scope for it
+		c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
+		if c.symbolTable.Outer.Outer == nil {
+			c.symbolTable.numDefinitions = 0
+		} else {
+			c.symbolTable.numDefinitions = c.symbolTable.Outer.numDefinitions
+		}
+		c.symbolTable.block = true
+
+		defer func() {
+			c.symbolTable = c.symbolTable.Outer
+		}()
+
 		err = c.Compile(node.Init)
 		if err != nil {
 			return err
