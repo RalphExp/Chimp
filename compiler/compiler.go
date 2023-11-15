@@ -173,6 +173,7 @@ func (c *Compiler) CompileShortCircuit(node *ast.InfixExpression) error {
 		return err
 	}
 
+	// TODO: right association??
 	if node.Operator == "&&" {
 		jumpToEnd = c.emit(code.OpJumpIfFalseNonPop, -1)
 	} else if node.Operator == "||" {
