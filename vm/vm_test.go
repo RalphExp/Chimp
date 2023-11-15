@@ -94,6 +94,16 @@ func TestWhile(t *testing.T) {
 	runVmTests(t, tests)
 }
 
+func TestLogicalOperation(t *testing.T) {
+	tests := []vmTestCase{
+		{"let a = 1; let b = 2; (a+=1) || (b+=1); a", 2},
+		{"let a = 1; let b = 2; (a+=1) || (b+=1); b", 2},
+		{"0 || 1 && 2 || 3", 2},
+		{"0 && 1 || 2 && 3", 3},
+	}
+	runVmTests(t, tests)
+}
+
 func TestBlockScope(t *testing.T) {
 	tests := []vmTestCase{
 		{"if (1) { let a = 1; if (1) { let b = 2; } let c = 3; a + c}", 4},

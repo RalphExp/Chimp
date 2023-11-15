@@ -69,6 +69,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return evalAssignmentExression(node, env)
 		}
 
+		if parser.IsLogicalOperator(node.Operator) {
+			return evalLogicalExpression(node, env)
+		}
+
 		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
@@ -222,10 +226,6 @@ func evalInfixExpression(
 	left, right object.Object,
 ) object.Object {
 	switch {
-	case operator == "&&":
-		return evalAndExpression(left, right)
-	case operator == "||":
-		return evalOrExpression(left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
@@ -241,22 +241,6 @@ func evalInfixExpression(
 		return newError("unknown operator: %s %s %s",
 			left.Type(), operator, right.Type())
 	}
-}
-
-func evalAndExpression(left, right object.Object) object.Object {
-	b := isTruthy(left)
-	if !b {
-		return left
-	}
-	return right
-}
-
-func evalOrExpression(left, right object.Object) object.Object {
-	b := isTruthy(left)
-	if b {
-		return left
-	}
-	return right
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
@@ -299,7 +283,7 @@ func evalAssignmentExression(
 			e.Set(lhs.Value, right)
 		default:
 			result := evalInfixExpression(string(op), left, right)
-			if result.Type() == object.ERROR_OBJ {
+			if isError(result) {
 				return result
 			}
 			e.Set(lhs.Value, result)
@@ -313,6 +297,33 @@ func evalAssignmentExression(
 
 	default:
 		return newError("Invalid left hand side value in assignment")
+	}
+}
+
+func evalLogicalExpression(
+	node *ast.InfixExpression,
+	env *object.Environment,
+) object.Object {
+
+	left := Eval(node.Left, env)
+	if isError(left) {
+		return left
+	}
+
+	if node.Operator == "&&" {
+		if isTruthy(left) {
+			return Eval(node.Right, env)
+		} else {
+			return left
+		}
+	} else if node.Operator == "||" {
+		if isTruthy(left) {
+			return left
+		} else {
+			return Eval(node.Right, env)
+		}
+	} else {
+		panic(fmt.Sprintf("unknow operator: %s\n", node.Operator))
 	}
 }
 

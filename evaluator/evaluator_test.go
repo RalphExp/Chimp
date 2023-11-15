@@ -136,7 +136,7 @@ func TestWhileStatements(t *testing.T) {
 	}
 }
 
-func TestComparationOperators(t *testing.T) {
+func TestLogicalOperators(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected interface{}
@@ -151,6 +151,8 @@ func TestComparationOperators(t *testing.T) {
 		{"1+2 || 3+4", 3},
 		{"1-1 && 3+4", 0},
 		{"1||3&&0||2", 1},
+		{"let a=0; let b=0; (a+=1)||(b+=1); b;", 0},
+		{"let a=1; let b=1; (a-=1)&&(b-=1); b;", 1},
 	}
 
 	for _, tt := range tests {
