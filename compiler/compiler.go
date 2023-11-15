@@ -436,7 +436,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		c.Compile(node.Increment)
+		err = c.Compile(node.Increment)
+		if err != nil {
+			return err
+		}
+
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
