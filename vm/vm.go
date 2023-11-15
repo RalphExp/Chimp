@@ -137,6 +137,33 @@ func (vm *VM) Run() error {
 				vm.currentFrame().ip = pos - 1
 			}
 
+		case code.OpJumpIfFalseNonPop:
+			pos := int(code.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
+
+			condition := vm.top()
+			if !isTruthy(condition) {
+				vm.currentFrame().ip = pos - 1
+			}
+
+		case code.OpJumpIfTrue:
+			pos := int(code.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
+
+			condition := vm.pop()
+			if isTruthy(condition) {
+				vm.currentFrame().ip = pos - 1
+			}
+
+		case code.OpJumpIfTrueNonPop:
+			pos := int(code.ReadUint16(ins[ip+1:]))
+			vm.currentFrame().ip += 2
+
+			condition := vm.top()
+			if isTruthy(condition) {
+				vm.currentFrame().ip = pos - 1
+			}
+
 		case code.OpNull:
 			err := vm.push(Null)
 			if err != nil {

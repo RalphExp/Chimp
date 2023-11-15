@@ -72,6 +72,9 @@ const (
 	OpMinus
 	OpBang
 	OpJumpIfFalse
+	OpJumpIfFalseNonPop
+	OpJumpIfTrue
+	OpJumpIfTrueNonPop
 	OpJump
 	OpNull
 	OpGetGlobal
@@ -98,44 +101,47 @@ type Definition struct {
 }
 
 var definitions = map[Opcode]*Definition{
-	OpConstant:       {"OpConstant", []int{2}},
-	OpAdd:            {"OpAdd", []int{}},
-	OpPop:            {"OpPop", []int{}},
-	OpSub:            {"OpSub", []int{}},
-	OpMul:            {"OpMul", []int{}},
-	OpDiv:            {"OpDiv", []int{}},
-	OpMod:            {"OpMod", []int{}},
-	OpTrue:           {"OpTrue", []int{}},
-	OpFalse:          {"OpFalse", []int{}},
-	OpEqual:          {"OpEqual", []int{}},
-	OpNotEqual:       {"OpNotEqual", []int{}},
-	OpLess:           {"OpLess", []int{}},
-	OpLessEqual:      {"OpLessEqual", []int{}},
-	OpGreater:        {"OpGreater", []int{}},
-	OpGreaterEqual:   {"OpGreaterEqual", []int{}},
-	OpAnd:            {"OpAnd", []int{}},
-	OpOr:             {"OpOr", []int{}},
-	OpMinus:          {"OpMinus", []int{}},
-	OpBang:           {"OpBang", []int{}},
-	OpJumpIfFalse:    {"OpJumpIfFalse", []int{2}},
-	OpJump:           {"OpJump", []int{2}},
-	OpNull:           {"OpNull", []int{}},
-	OpGetGlobal:      {"OpGetGlobal", []int{2}},
-	OpSetGlobal:      {"OpSetGlobal", []int{2}},
-	OpArray:          {"OpArray", []int{2}},
-	OpIndex:          {"OpIndex", []int{}},
-	OpSetIndex:       {"OpSetIndex", []int{}}, // TODO
-	OpHash:           {"OpHash", []int{2}},
-	OpSetHash:        {"OpSetHash", []int{}}, // TODO
-	OpCall:           {"OpCall", []int{1}},
-	OpReturnValue:    {"OpReturnValue", []int{}},
-	OpReturn:         {"OpReturn", []int{}},
-	OpGetLocal:       {"OpGetLocal", []int{1}},
-	OpSetLocal:       {"OpSetLocal", []int{1}},
-	OpGetBuiltin:     {"OpGetBuiltin", []int{1}},
-	OpClosure:        {"OpClosure", []int{2, 1}},
-	OpGetFree:        {"OpGetFree", []int{1}},
-	OpCurrentClosure: {"OpCurrentClosure", []int{}},
+	OpConstant:          {"OpConstant", []int{2}},
+	OpAdd:               {"OpAdd", []int{}},
+	OpPop:               {"OpPop", []int{}},
+	OpSub:               {"OpSub", []int{}},
+	OpMul:               {"OpMul", []int{}},
+	OpDiv:               {"OpDiv", []int{}},
+	OpMod:               {"OpMod", []int{}},
+	OpTrue:              {"OpTrue", []int{}},
+	OpFalse:             {"OpFalse", []int{}},
+	OpEqual:             {"OpEqual", []int{}},
+	OpNotEqual:          {"OpNotEqual", []int{}},
+	OpLess:              {"OpLess", []int{}},
+	OpLessEqual:         {"OpLessEqual", []int{}},
+	OpGreater:           {"OpGreater", []int{}},
+	OpGreaterEqual:      {"OpGreaterEqual", []int{}},
+	OpAnd:               {"OpAnd", []int{}},
+	OpOr:                {"OpOr", []int{}},
+	OpMinus:             {"OpMinus", []int{}},
+	OpBang:              {"OpBang", []int{}},
+	OpJumpIfFalse:       {"OpJumpIfFalse", []int{2}},
+	OpJumpIfFalseNonPop: {"OpJumpIfFalseNonPop", []int{2}},
+	OpJumpIfTrue:        {"OpJumpIfTrue", []int{2}},
+	OpJumpIfTrueNonPop:  {"OpJumpIfTrueNonPop", []int{2}},
+	OpJump:              {"OpJump", []int{2}},
+	OpNull:              {"OpNull", []int{}},
+	OpGetGlobal:         {"OpGetGlobal", []int{2}},
+	OpSetGlobal:         {"OpSetGlobal", []int{2}},
+	OpArray:             {"OpArray", []int{2}},
+	OpIndex:             {"OpIndex", []int{}},
+	OpSetIndex:          {"OpSetIndex", []int{}}, // TODO
+	OpHash:              {"OpHash", []int{2}},
+	OpSetHash:           {"OpSetHash", []int{}}, // TODO
+	OpCall:              {"OpCall", []int{1}},
+	OpReturnValue:       {"OpReturnValue", []int{}},
+	OpReturn:            {"OpReturn", []int{}},
+	OpGetLocal:          {"OpGetLocal", []int{1}},
+	OpSetLocal:          {"OpSetLocal", []int{1}},
+	OpGetBuiltin:        {"OpGetBuiltin", []int{1}},
+	OpClosure:           {"OpClosure", []int{2, 1}},
+	OpGetFree:           {"OpGetFree", []int{1}},
+	OpCurrentClosure:    {"OpCurrentClosure", []int{}},
 }
 
 func Lookup(op byte) (*Definition, error) {

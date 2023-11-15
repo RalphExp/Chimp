@@ -61,6 +61,10 @@ func IsAssignmentOperator(op string) bool {
 	return ok
 }
 
+func IsShortCircuitOperator(op string) bool {
+	return op == "&&" || op == "||"
+}
+
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression

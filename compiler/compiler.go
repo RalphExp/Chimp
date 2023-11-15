@@ -166,6 +166,32 @@ func (c *Compiler) CompileBlockStatement(
 	return nil
 }
 
+func (c *Compiler) CompileShortCircuit(node *ast.InfixExpression) error {
+	var jumpToEnd int
+	err := c.Compile(node.Left)
+	if err != nil {
+		return err
+	}
+
+	if node.Operator == "&&" {
+		jumpToEnd = c.emit(code.OpJumpIfFalseNonPop, -1)
+	} else if node.Operator == "||" {
+		jumpToEnd = c.emit(code.OpJumpIfTrueNonPop, -1)
+	} else {
+		panic(fmt.Sprintf("unknow operator: %s\n", node.Operator))
+	}
+
+	c.emit(code.OpPop)
+	err = c.Compile(node.Right)
+	if err != nil {
+		return err
+	}
+
+	end := len(c.currentInstructions())
+	c.changeOperand(jumpToEnd, end)
+	return nil
+}
+
 func (c *Compiler) Compile(node ast.Node) error {
 	switch node := node.(type) {
 	case *ast.Program:
@@ -186,6 +212,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.InfixExpression:
 		if parser.IsAssignmentOperator(node.Operator) {
 			return c.CompileAssignment(node)
+		}
+
+		if parser.IsShortCircuitOperator(node.Operator) {
+			return c.CompileShortCircuit(node)
 		}
 
 		err := c.Compile(node.Left)
@@ -338,7 +368,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
+		jumpToEnd := c.emit(code.OpJumpIfFalse, -1)
 
 		err = c.Compile(node.Body)
 
@@ -348,7 +378,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		c.emit(code.OpJump, restart)
 		end = len(c.currentInstructions())
-		c.changeOperand(jmpToEnd, end)
+		c.changeOperand(jumpToEnd, end)
 
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
@@ -386,11 +416,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
-		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
+		jumpToEnd := c.emit(code.OpJumpIfFalse, -1)
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
-		c.changeOperand(jmpToEnd, end)
+		c.changeOperand(jumpToEnd, end)
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
 
@@ -443,7 +473,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpTrue)
 		}
 
-		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
+		jumpToEnd := c.emit(code.OpJumpIfFalse, -1)
 		err = c.Compile(node.Body)
 		if err != nil {
 			return err
@@ -457,7 +487,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.OpJump, restart)
 
 		end = len(c.currentInstructions())
-		c.changeOperand(jmpToEnd, end)
+		c.changeOperand(jumpToEnd, end)
 
 	case *ast.BlockStatement:
 		return c.CompileBlockStatement(node, false)
