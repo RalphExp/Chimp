@@ -166,14 +166,13 @@ func (c *Compiler) CompileBlockStatement(
 	return nil
 }
 
-func (c *Compiler) CompileShortCircuit(node *ast.InfixExpression) error {
+func (c *Compiler) CompileLogicalOperator(node *ast.InfixExpression) error {
 	var jumpToEnd int
 	err := c.Compile(node.Left)
 	if err != nil {
 		return err
 	}
 
-	// TODO: right association??
 	if node.Operator == "&&" {
 		jumpToEnd = c.emit(code.OpJumpIfFalseNonPop, -1)
 	} else if node.Operator == "||" {
@@ -215,8 +214,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return c.CompileAssignment(node)
 		}
 
-		if parser.IsShortCircuitOperator(node.Operator) {
-			return c.CompileShortCircuit(node)
+		if parser.IsLogicalOperator(node.Operator) {
+			return c.CompileLogicalOperator(node)
 		}
 
 		err := c.Compile(node.Left)

@@ -61,7 +61,7 @@ func IsAssignmentOperator(op string) bool {
 	return ok
 }
 
-func IsShortCircuitOperator(op string) bool {
+func IsLogicalOperator(op string) bool {
 	return op == "&&" || op == "||"
 }
 
@@ -352,8 +352,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 	leftExp := prefix()
 
-	// assign is right association, need to decrease precedence
-	if precedence == ASSIGN {
+	// assign/and/or are right association, need to decrease precedence
+	if precedence == ASSIGN || precedence == AND || precedence == OR {
 		precedence--
 	}
 
