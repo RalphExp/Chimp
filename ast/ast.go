@@ -231,7 +231,7 @@ type ForStatement struct {
 	Token     token.Token
 	Init      Statement // only LetStatment or ExpressionStatement is allowed
 	Condition Expression
-	Increment Expression
+	Increment Statement
 	Body      Statement
 }
 

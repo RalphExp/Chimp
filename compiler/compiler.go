@@ -394,6 +394,50 @@ func (c *Compiler) Compile(node ast.Node) error {
 		// since while is not a expression, the TOS should be the same
 		// before compiling while statement
 
+	case *ast.ForStatement:
+		var restart int
+		var end int
+		var err error
+
+		c.pushBreakContext()
+		c.pushContinueContext()
+
+		defer func() {
+			// backfill
+			l := len(c.breakContext)
+			for _, ip := range c.breakContext[l-1].ips {
+				c.changeOperand(ip, end)
+			}
+			for _, ip := range c.continueContext[l-1].ips {
+				c.changeOperand(ip, restart)
+			}
+			c.popBreakContext()
+			c.popContinueContext()
+		}()
+
+		err = c.Compile(node.Init)
+		if err != nil {
+			return err
+		}
+
+		restart = len(c.currentInstructions())
+		err = c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
+		err = c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		c.Compile(node.Increment)
+		c.emit(code.OpJump, restart)
+
+		end = len(c.currentInstructions())
+		c.changeOperand(jmpToEnd, end)
+
 	case *ast.BlockStatement:
 		return c.CompileBlockStatement(node, false)
 

@@ -510,7 +510,7 @@ func (p *Parser) parseForStatement() *ast.ForStatement {
 	if p.GetToken().Type == token.RPAREN {
 		statement.Increment = nil
 	} else {
-		statement.Increment = p.parseExpression(LOWEST)
+		statement.Increment = p.parseExpressionStatement()
 		p.expectPeek(token.RPAREN)
 	}
 
