@@ -1,8 +1,7 @@
 package main
 
 import (
-	"chimp/repl/compiler"
-	"chimp/repl/interpretor"
+	"chimp/repl"
 	"fmt"
 	"os"
 	"os/user"
@@ -27,11 +26,11 @@ func main() {
 	if len(os.Args) >= 2 {
 		if os.Args[1] == "-vm" {
 			fmt.Printf("engine [vm]\n")
-			compiler.Start(os.Stdin, os.Stdout)
+			repl.StartCompiler(os.Stdin, os.Stdout)
 			return
 		}
 	}
 
 	fmt.Printf("engine [interpreter]\n")
-	interpretor.Start(os.Stdin, os.Stdout)
+	repl.StartInterpreter(os.Stdin, os.Stdout)
 }

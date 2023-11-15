@@ -1,4 +1,4 @@
-package interpretor
+package repl
 
 import (
 	"chimp/evaluator"
@@ -10,9 +10,7 @@ import (
 	"io"
 )
 
-const PROMPT = "chimp> "
-
-func Start(in io.Reader, out io.Writer) {
+func StartInterpreter(in io.Reader, out io.Writer) {
 	env := object.NewEnvironment()
 
 	fmt.Fprintf(out, "%s", MONKEY_FACE)
@@ -48,27 +46,5 @@ func Start(in io.Reader, out io.Writer) {
 		}
 		fmt.Fprintf(out, "%s", PROMPT)
 		p.NextToken()
-	}
-}
-
-const MONKEY_FACE = `            __,__
-   .--.  .-"     "-.  .--.
-  / .. \/  .-. .-.  \/ .. \
- | |  '|  /   Y   \  |'  | |
- | \   \  \ 0 | 0 /  /   / |
-  \ '- ,\.-"""""""-./, -' /
-   ''-' /_   ^ ^   _\ '-''
-       |  \._   _./  |
-       \   \ '~' /   /
-        '._ '-=-' _.'
-           '-----'
-`
-
-func printParserErrors(out io.Writer, errors []string) {
-	// io.WriteString(out, MONKEY_FACE)
-	io.WriteString(out, "Woops! We ran into some monkey business here!\n")
-	io.WriteString(out, " parser errors:\n")
-	for _, msg := range errors {
-		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
