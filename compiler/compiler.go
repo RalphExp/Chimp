@@ -421,9 +421,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		restart = len(c.currentInstructions())
-		err = c.Compile(node.Condition)
-		if err != nil {
-			return err
+		if node.Condition != nil {
+			err = c.Compile(node.Condition)
+			if err != nil {
+				return err
+			}
+		} else {
+			c.emit(code.OpTrue)
 		}
 
 		jmpToEnd := c.emit(code.OpJumpIfFalse, -1)
