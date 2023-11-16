@@ -8,20 +8,21 @@ A javascript like language with VM, extending Monkey, but with more strict synta
 
 ### New Features
 - a enhanced REPL shell and interpreter
-- block scope
-- change if expression to if statement
+- support block scope
 - support while statement
 - support do-while statement
 - support for statement
 - support break and continue statements
 - op-assigment +=, -=, .etc
-- short circuit and/or
-- byte code for the new statements
+- short circuit logical operators (&&, ||)
+- byte code for all of the new statements
 - line comments and block comment
 
 ### TODO:
 - see the code
 
 ### How to run
-> go run main.go [-vm|-eval]
-
+```sh
+make
+./chimp -vm
+```
