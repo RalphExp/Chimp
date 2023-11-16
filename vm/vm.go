@@ -574,8 +574,12 @@ func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 
 	// allocate spaces for parameters and local variables
 	// cl.Fn.NumLocals = number of parameters + number fo local variables
-	vm.sp = frame.basePointer + cl.Fn.NumLocals
+	// vm.sp = frame.basePointer + cl.Fn.NumLocals
 
+	// FIXME: we can also use cl.Fn.NumParameters to make it more understandable
+	// since the stack pointer will automatically increase when new local variables
+	// are defined.
+	vm.sp = frame.basePointer + cl.Fn.NumParameters
 	return nil
 }
 
@@ -583,6 +587,9 @@ func (vm *VM) callBuiltin(builtin *object.Builtin, numArgs int) error {
 	args := vm.stack[vm.sp-numArgs : vm.sp]
 
 	result := builtin.Fn(args...)
+
+	// point to the builtin function, which will be overwritten
+	// by the result
 	vm.sp = vm.sp - numArgs - 1
 
 	if result != nil {

@@ -194,7 +194,7 @@ func (h *Hash) Inspect() string {
 
 type CompiledFunction struct {
 	Instructions  code.Instructions
-	NumLocals     int
+	NumLocals     int // FIXME: obsoleted
 	NumParameters int
 }
 
